@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación: Estructuras de Datos Básicas en Java</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos personalizados (iguales a la presentación anterior) */
+        body {
+            font-family: 'Inter', sans-serif; /* Fuente Inter */
+            overflow: hidden; /* Evitar scroll general */
+        }
+        /* Estilo para las diapositivas */
+        .slide {
+            display: none; /* Ocultar todas las diapositivas por defecto */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out; /* Transición suave */
+            min-height: calc(100vh - 100px); /* Altura mínima para llenar la pantalla menos la navegación */
+            border-radius: 1rem; /* Bordes redondeados */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Sombra */
+            background-color: white; /* Fondo blanco por defecto */
+            padding: 2rem; /* Padding interno */
+            margin-bottom: 1rem; /* Espacio inferior */
+            overflow-y: auto; /* Permitir scroll si el contenido es largo */
+            max-height: calc(100vh - 100px); /* Altura máxima */
+        }
+        .slide.active {
+            display: block; /* Mostrar la diapositiva activa */
+            opacity: 1;
+        }
+        /* Estilos para el contenedor principal */
+        .presentation-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Fondo gradiente */
+            padding: 1rem;
+        }
+        /* Estilos para la navegación */
+        .navigation {
+            margin-top: auto; /* Empujar la navegación hacia abajo */
+            padding-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-button {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #4a5568;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px; /* Botones redondeados */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .nav-button:active {
+            transform: scale(0.95);
+        }
+        .nav-button:disabled {
+            background-color: rgba(200, 200, 200, 0.5);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .slide-counter {
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        /* Estilos para el código */
+        .code-block-wrapper {
+            position: relative; /* Necesario para posicionar el botón de copia */
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        pre {
+            background-color: #2d3748; /* Fondo oscuro para código */
+            color: #e2e8f0; /* Texto claro */
+            padding: 1.5rem;
+            padding-top: 3rem; /* Más padding superior para dejar espacio al botón */
+            border-radius: 0.5rem; /* Bordes redondeados */
+            overflow-x: auto; /* Scroll horizontal si el código es largo */
+            font-family: 'Consolas', 'Monaco', monospace; /* Fuente monoespaciada */
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        code {
+             font-family: 'Consolas', 'Monaco', monospace; /* Fuente monoespaciada */
+        }
+        .keyword { color: #63b3ed; font-weight: bold; } /* Azul claro para palabras clave */
+        .type { color: #faf089; } /* Amarillo para tipos */
+        .method-name { color: #9ae6b4; } /* Verde claro para nombres de método */
+        .parameter { color: #feb2b2; } /* Rojo claro para parámetros */
+        .comment { color: #a0aec0; font-style: italic; } /* Gris claro para comentarios */
+        .string { color: #f6ad55; } /* Naranja para strings */
+        .number { color: #f6ad55; } /* Naranja para números */
+        .class-name { color: #fbd38d; } /* Amarillo-naranja para nombres de clase */
+
+        /* Estilo para el botón de copiar */
+        .copy-button {
+            position: absolute;
+            top: 0.75rem; /* Espacio desde arriba */
+            right: 0.75rem; /* Espacio desde la derecha */
+            background-color: #4a5568; /* Gris oscuro */
+            color: #e2e8f0; /* Texto claro */
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.375rem; /* Bordes redondeados */
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            opacity: 0.8; /* Ligeramente transparente */
+        }
+        .copy-button:hover {
+            background-color: #718096; /* Gris más claro al pasar el ratón */
+            opacity: 1;
+        }
+        .copy-button i {
+            margin-right: 0.3rem; /* Espacio entre icono y texto */
+        }
+        .copy-button.copied {
+            background-color: #48bb78; /* Verde al copiar */
+            color: white;
+        }
+        .copy-button.error { /* Estilo para el botón de error */
+             background-color: #f56565; /* Rojo */
+             color: white;
+        }
+
+        /* Animación de entrada para títulos */
+        .fade-in-down {
+            animation: fadeInDown 0.6s ease-out forwards;
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Estilos adicionales para listas */
+        ul.list-disc {
+            padding-left: 1.5rem; /* Añadir padding a listas */
+        }
+        ol.list-decimal {
+            padding-left: 1.5rem; /* Añadir padding a listas ordenadas */
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <div class="presentation-container">
+
+        <div id="slide-1" class="slide active">
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4 fade-in-down">Estructuras de Datos Básicas</h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-8 fade-in-down" style="animation-delay: 0.2s;">Organizando la Información en Programación</p>
+                <i class="fas fa-database text-6xl text-indigo-500 fade-in-down" style="animation-delay: 0.4s;"></i>
+                <p class="mt-8 text-gray-500 text-sm">Fundamentos de Algoritmos</p>
+            </div>
+        </div>
+
+        <div id="slide-2" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">¡Bienvenidos! <i class="fas fa-stream ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Hoy exploraremos conceptos esenciales para manejar y organizar datos en nuestros programas: las <strong>estructuras de datos</strong>.</p>
+            <p class="text-lg text-gray-700 mb-4">Aprenderemos sobre:</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>¿Qué es una estructura de datos y por qué son importantes?</li>
+                <li><strong>Arreglos</strong>: Unidimensionales (vectores), Bidimensionales (matrices) y Multidimensionales.</li>
+                <li><strong>Algoritmos de Búsqueda</strong>: Secuencial y Binaria.</li>
+                <li><strong>Algoritmos de Ordenamiento</strong>: Burbuja, Inserción y Selección.</li>
+            </ul>
+            <p class="text-lg text-gray-700 font-semibold">Estas herramientas son fundamentales para procesar información de manera eficiente.</p>
+        </div>
+
+        <div id="slide-3" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">¿Qué es una Estructura de Datos? <i class="fas fa-boxes ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Es una forma de <strong>organizar y almacenar datos</strong> en una computadora para que puedan ser utilizados de manera eficiente.</p>
+            <p class="text-lg text-gray-700 mb-4">Permiten manipular la información de manera flexible y estructurada, siguiendo reglas y comportamientos definidos.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Permiten representar información compleja.</li>
+                <li>Facilitan operaciones como insertar, eliminar, buscar y ordenar datos.</li>
+                <li>Pueden ser <strong>estáticas</strong> (tamaño fijo, como los arreglos) o <strong>dinámicas</strong> (tamaño variable, como las listas enlazadas).</li>
+            </ul>
+            <div class="bg-indigo-100 p-4 rounded-lg mt-6">
+                <p class="text-indigo-800 font-semibold"><i class="fas fa-lightbulb mr-2"></i>Importancia:</p>
+                <p class="text-indigo-700">Elegir la estructura de datos adecuada es crucial para la eficiencia y el rendimiento de un algoritmo o programa.</p>
+            </div>
+        </div>
+
+        <div id="slide-4" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Arreglos (Arrays) <i class="fas fa-th-large ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Son estructuras de datos <strong>compuestas</strong> y <strong>estáticas</strong> que almacenan un conjunto de elementos del <strong>mismo tipo</strong>.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Los elementos se guardan en localidades de memoria <strong>contiguas</strong> (uno al lado del otro).</li>
+                <li>Se referencian usando un <strong>nombre común</strong> para todo el conjunto.</li>
+                <li>Se accede a cada elemento individual mediante uno o más <strong>índices</strong> (subíndices).</li>
+                <li>La indexación típicamente comienza en <strong>0</strong>.</li>
+                <li>Su tamaño se define al declararlos y <strong>no cambia</strong> durante la ejecución.</li>
+            </ul>
+            <div class="bg-yellow-100 p-4 rounded-lg mt-6">
+                 <p class="text-yellow-800 font-semibold"><i class="fas fa-exclamation-triangle mr-2"></i>¡Cuidado!</p>
+                 <p class="text-yellow-700">Intentar acceder a un índice fuera de los límites del arreglo causará un error.</p>
+            </div>
+        </div>
+
+        <div id="slide-5" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Arreglos Unidimensionales (Vectores) <i class="fas fa-grip-lines ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Son la forma más simple de arreglo, almacenan una secuencia <strong>lineal</strong> de elementos.</p>
+            <p class="text-lg text-gray-700 mb-4">Se accede a cada elemento usando <strong>un solo índice</strong>.</p>
+            <p class="text-lg text-gray-700 mb-2"><strong>Declaración y Ejemplo (Java):</strong></p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="comment">// Declara un arreglo de Strings llamado MiPrimerArreglo con 5 posiciones</span>
+<span class="type">String</span>[] MiPrimerArreglo = <span class="keyword">new</span> <span class="type">String</span>[<span class="number">5</span>];
+
+<span class="comment">// Asigna valores a cada posición usando su índice (0 a 4)</span>
+MiPrimerArreglo[<span class="number">0</span>] = <span class="string">"Dato 1"</span>;
+MiPrimerArreglo[<span class="number">1</span>] = <span class="string">"Dato 2"</span>;
+MiPrimerArreglo[<span class="number">2</span>] = <span class="string">"Dato 3"</span>;
+MiPrimerArreglo[<span class="number">3</span>] = <span class="string">"Dato 4"</span>;
+MiPrimerArreglo[<span class="number">4</span>] = <span class="string">"Dato 5"</span>;
+
+<span class="comment">// Para acceder al tercer elemento (índice 2):</span>
+<span class="type">String</span> tercerDato = MiPrimerArreglo[<span class="number">2</span>]; <span class="comment">// tercerDato contendrá "Dato 3"</span></code></pre>
+            </div>
+            <p class="text-lg text-gray-700 mt-4"><strong>Recorrido:</strong> Se usan ciclos (como `for`) para visitar cada elemento, usando el contador del ciclo como índice.</p>
+        </div>
+
+        <div id="slide-6" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Arreglos Bidimensionales (Matrices) <i class="fas fa-th ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Representan datos organizados en <strong>filas y columnas</strong>.</p>
+            <p class="text-lg text-gray-700 mb-4">Se necesitan <strong>dos índices</strong> para acceder a un elemento: uno para la fila y otro para la columna.</p>
+            <p class="text-lg text-gray-700 mb-2"><strong>Declaración y Ejemplo (Java):</strong></p>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="comment">// Declara una matriz de Strings con 2 filas y 4 columnas</span>
+<span class="type">String</span>[][] MiSegundoArreglo = <span class="keyword">new</span> <span class="type">String</span>[<span class="number">2</span>][<span class="number">4</span>];
+
+<span class="comment">// Asigna valores usando [fila][columna] (índices desde 0)</span>
+MiSegundoArreglo[<span class="number">0</span>][<span class="number">0</span>] = <span class="string">"Dato 1"</span>; <span class="comment">// Fila 0, Columna 0</span>
+MiSegundoArreglo[<span class="number">0</span>][<span class="number">1</span>] = <span class="string">"Dato 2"</span>;
+MiSegundoArreglo[<span class="number">0</span>][<span class="number">2</span>] = <span class="string">"Dato 3"</span>;
+MiSegundoArreglo[<span class="number">0</span>][<span class="number">3</span>] = <span class="string">"Dato 4"</span>;
+
+MiSegundoArreglo[<span class="number">1</span>][<span class="number">0</span>] = <span class="string">"Dato 5"</span>; <span class="comment">// Fila 1, Columna 0</span>
+MiSegundoArreglo[<span class="number">1</span>][<span class="number">1</span>] = <span class="string">"Dato 6"</span>;
+MiSegundoArreglo[<span class="number">1</span>][<span class="number">2</span>] = <span class="string">"Dato 7"</span>;
+MiSegundoArreglo[<span class="number">1</span>][<span class="number">3</span>] = <span class="string">"Dato 8"</span>;
+
+<span class="comment">// Para acceder al elemento en la Fila 1, Columna 2:</span>
+<span class="type">String</span> datoEspecifico = MiSegundoArreglo[<span class="number">1</span>][<span class="number">2</span>]; <span class="comment">// datoEspecifico contendrá "Dato 7"</span></code></pre>
+            </div>
+            <p class="text-lg text-gray-700 mt-4"><strong>Recorrido:</strong> Se usan <strong>ciclos anidados</strong> (dos `for`), uno para las filas y otro para las columnas.</p>
+        </div>
+
+        <div id="slide-7" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Recorriendo una Matriz <i class="fas fa-redo-alt ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Para procesar todos los elementos de una matriz, usamos ciclos anidados:</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="keyword">public class</span> <span class="class-name">RecorridoMatriz</span> {
+    <span class="keyword">public static void</span> <span class="method-name">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">String</span>[][] miMatriz = <span class="keyword">new</span> <span class="type">String</span>[<span class="number">2</span>][<span class="number">4</span>];
+        <span class="comment">// (Asignar valores como en la diapositiva anterior...)</span>
+        miMatriz[<span class="number">0</span>][<span class="number">0</span>] = <span class="string">"D1"</span>; miMatriz[<span class="number">0</span>][<span class="number">1</span>] = <span class="string">"D2"</span>; miMatriz[<span class="number">0</span>][<span class="number">2</span>] = <span class="string">"D3"</span>; miMatriz[<span class="number">0</span>][<span class="number">3</span>] = <span class="string">"D4"</span>;
+        miMatriz[<span class="number">1</span>][<span class="number">0</span>] = <span class="string">"D5"</span>; miMatriz[<span class="number">1</span>][<span class="number">1</span>] = <span class="string">"D6"</span>; miMatriz[<span class="number">1</span>][<span class="number">2</span>] = <span class="string">"D7"</span>; miMatriz[<span class="number">1</span>][<span class="number">3</span>] = <span class="string">"D8"</span>;
+
+        System.out.println(<span class="string">"Recorriendo la matriz:"</span>);
+
+        <span class="comment">// Ciclo externo para las filas (i va de 0 a 1)</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">2</span>; i++) {
+            <span class="comment">// Ciclo interno para las columnas (j va de 0 a 3)</span>
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">4</span>; j++) {
+                <span class="comment">// Acceder al elemento en la fila i, columna j</span>
+                System.out.print(miMatriz[i][j] + <span class="string">" "</span>);
+            }
+            System.out.println(); <span class="comment">// Salto de línea al final de cada fila</span>
+        }
+    }
+}</code></pre>
+            </div>
+             <p class="text-lg text-gray-700 mt-4">El ciclo externo controla las filas y el interno las columnas, permitiendo visitar cada celda.</p>
+        </div>
+
+        <div id="slide-8" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Arreglos Multidimensionales <i class="fas fa-cube ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Son arreglos con <strong>más de dos dimensiones</strong> (tridimensionales, etc.).</p>
+            <p class="text-lg text-gray-700 mb-4">Se necesita <strong>un índice por cada dimensión</strong> para acceder a un elemento.</p>
+            <p class="text-lg text-gray-700 mb-2"><strong>Declaración y Ejemplo (Java - 3D):</strong></p>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="comment">// Declara un arreglo tridimensional (ej: 2 matrices de 3x4)</span>
+<span class="type">String</span>[][][] MiTercerArreglo = <span class="keyword">new</span> <span class="type">String</span>[<span class="number">2</span>][<span class="number">3</span>][<span class="number">4</span>];
+
+<span class="comment">// Asigna un valor usando [dim1][dim2][dim3]</span>
+MiTercerArreglo[<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>] = <span class="string">"Dato 1 (0,0,0)"</span>;
+MiTercerArreglo[<span class="number">0</span>][<span class="number">1</span>][<span class="number">2</span>] = <span class="string">"Dato X (0,1,2)"</span>;
+MiTercerArreglo[<span class="number">1</span>][<span class="number">2</span>][<span class="number">3</span>] = <span class="string">"Dato Y (1,2,3)"</span>;
+<span class="comment">// ... y así sucesivamente para todas las posiciones</span>
+
+<span class="comment">// Acceder a un elemento:</span>
+<span class="type">String</span> dato3D = MiTercerArreglo[<span class="number">0</span>][<span class="number">1</span>][<span class="number">2</span>]; <span class="comment">// Contendrá "Dato X (0,1,2)"</span></code></pre>
+            </div>
+            <p class="text-lg text-gray-700 mt-4"><strong>Recorrido:</strong> Se usan <strong>ciclos anidados</strong>, uno por cada dimensión (en este caso, tres `for`). Son más complejos de manejar.</p>
+        </div>
+
+        <div id="slide-9" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Algoritmos de Búsqueda <i class="fas fa-search ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Son conjuntos de instrucciones diseñados para <strong>localizar un elemento específico</strong> (valor objetivo o llave de búsqueda) dentro de una estructura de datos.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Identifican la ubicación de un elemento, si existe.</li>
+                <li>Fundamentales para la recuperación eficiente de información.</li>
+                <li>Ayudan a navegar por grandes colecciones de datos.</li>
+                <li>Su eficiencia se mide por su <strong>complejidad temporal</strong> (tiempo de ejecución) y <strong>espacial</strong> (uso de memoria).</li>
+            </ul>
+            <p class="text-lg text-gray-700 font-semibold">Veremos dos métodos comunes: Búsqueda Secuencial y Búsqueda Binaria.</p>
+        </div>
+
+        <div id="slide-10" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Búsqueda Secuencial (Lineal) <i class="fas fa-list-ol ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Es el método más simple: compara el elemento a buscar con <strong>cada elemento</strong> de la lista, uno por uno, desde el principio.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Funciona <strong>sin importar si la lista está ordenada o no</strong>.</li>
+                <li>Útil para conjuntos de datos pequeños o desordenados.</li>
+                <li>La búsqueda termina al encontrar el elemento o al llegar al final de la lista.</li>
+                <li>La no existencia solo se confirma tras revisar todos los elementos.</li>
+            </ul>
+            <p class="text-lg text-gray-700 mb-2"><strong>Eficiencia:</strong></p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-1 mb-6 pl-4">
+                 <li><strong>Peor caso:</strong> O(n) - Debe revisar todos los n elementos.</li>
+                 <li><strong>Mejor caso:</strong> O(1) - El elemento está al principio.</li>
+            </ul>
+             <div class="bg-blue-100 p-4 rounded-lg mt-6">
+                <p class="text-blue-800 font-semibold"><i class="fas fa-info-circle mr-2"></i>Simpleza:</p>
+                <p class="text-blue-700">Su principal ventaja es la facilidad de implementación.</p>
+            </div>
+        </div>
+
+        <div id="slide-11" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Búsqueda Secuencial - Ejemplo <i class="fas fa-code ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Implementación en Java:</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="keyword">public class</span> <span class="class-name">BusquedaSecuencial</span> {
+
+    <span class="comment">/**
+     * Busca un elemento en un arreglo usando búsqueda lineal.
+     * @param arr El arreglo donde buscar.
+     * @param elementoABuscar El elemento a encontrar.
+     * @return El índice del elemento si se encuentra, o -1 si no.
+     */</span>
+    <span class="keyword">public static int</span> <span class="method-name">busquedaLineal</span>(<span class="type">int</span>[] <span class="parameter">arr</span>, <span class="type">int</span> <span class="parameter">elementoABuscar</span>) {
+        <span class="comment">// Recorre cada índice del arreglo</span>
+        <span class="keyword">for</span> (<span class="type">int</span> indice = <span class="number">0</span>; indice &lt; arr.length; indice++) {
+            <span class="comment">// Compara el elemento actual con el buscado</span>
+            <span class="keyword">if</span> (arr[indice] == elementoABuscar) {
+                <span class="keyword">return</span> indice; <span class="comment">// Elemento encontrado, retorna su índice</span>
+            }
+        }
+        <span class="keyword">return</span> -<span class="number">1</span>; <span class="comment">// Elemento no encontrado después de recorrer todo</span>
+    }
+
+    <span class="comment">// Método auxiliar para imprimir el resultado</span>
+    <span class="keyword">public static void</span> <span class="method-name">imprimir</span>(<span class="type">int</span> <span class="parameter">elemento</span>, <span class="type">int</span> <span class="parameter">indice</span>) {
+        <span class="keyword">if</span> (indice == -<span class="number">1</span>) {
+            System.out.println(elemento + <span class="string">" no encontrado."</span>);
+        } <span class="keyword">else</span> {
+            System.out.println(elemento + <span class="string">" encontrado en el índice: "</span> + indice);
+        }
+    }
+
+    <span class="keyword">public static void</span> <span class="method-name">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">int</span>[] miArreglo = {<span class="number">89</span>, <span class="number">57</span>, <span class="number">91</span>, <span class="number">47</span>, <span class="number">95</span>, <span class="number">3</span>, <span class="number">27</span>, <span class="number">22</span>, <span class="number">67</span>, <span class="number">99</span>};
+        <span class="type">int</span> elementoBuscado = <span class="number">67</span>;
+
+        <span class="type">int</span> indiceEncontrado = <span class="method-name">busquedaLineal</span>(miArreglo, elementoBuscado);
+        <span class="method-name">imprimir</span>(elementoBuscado, indiceEncontrado); <span class="comment">// Salida: 67 encontrado en el índice: 8</span>
+
+        elementoBuscado = <span class="number">50</span>;
+        indiceEncontrado = <span class="method-name">busquedaLineal</span>(miArreglo, elementoBuscado);
+        <span class="method-name">imprimir</span>(elementoBuscado, indiceEncontrado); <span class="comment">// Salida: 50 no encontrado.</span>
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div id="slide-12" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Búsqueda Binaria (Dicotómica) <i class="fas fa-adjust ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Es un algoritmo <strong>eficiente</strong> que encuentra un elemento en una lista <strong>previamente ordenada</strong>.</p>
+            <p class="text-lg text-gray-700 mb-4">Utiliza la estrategia de <strong>"dividir y conquistar"</strong>:</p>
+            <ol class="list-decimal list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Compara el elemento buscado con el elemento <strong>central</strong> del intervalo de búsqueda actual.</li>
+                <li>Si coinciden, la búsqueda termina.</li>
+                <li>Si el buscado es menor, elimina la mitad <strong>superior</strong> del intervalo.</li>
+                <li>Si el buscado es mayor, elimina la mitad <strong>inferior</strong> del intervalo.</li>
+                <li>Repite el proceso en el intervalo restante hasta encontrar el elemento o que el intervalo esté vacío.</li>
+            </ol>
+             <p class="text-lg text-gray-700 mb-2"><strong>Eficiencia:</strong></p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-1 mb-6 pl-4">
+                 <li><strong>Complejidad:</strong> O(log n) - Mucho más rápida que la lineal para listas grandes.</li>
+                 <li><strong>Requisito:</strong> ¡La lista <strong>DEBE</strong> estar ordenada!</li>
+            </ul>
+            <div class="bg-green-100 p-4 rounded-lg mt-6">
+                <p class="text-green-800 font-semibold"><i class="fas fa-check-circle mr-2"></i>Ventaja:</p>
+                <p class="text-green-700">Reduce drásticamente el número de comparaciones necesarias en grandes conjuntos de datos.</p>
+            </div>
+        </div>
+
+        <div id="slide-13" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Búsqueda Binaria - Ejemplo <i class="fas fa-code ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Implementación en Java (requiere arreglo ordenado):</p>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="keyword">import</span> java.util.Arrays; <span class="comment">// Necesario para ordenar el arreglo</span>
+
+<span class="keyword">public class</span> <span class="class-name">BusquedaBinaria</span> {
+
+    <span class="comment">/**
+     * Busca un elemento en un arreglo ORDENADO usando búsqueda binaria.
+     * @param arr El arreglo ordenado donde buscar.
+     * @param elementoABuscar El elemento a encontrar.
+     * @return El índice del elemento si se encuentra, o -1 si no.
+     */</span>
+    <span class="keyword">public static int</span> <span class="method-name">busquedaBinaria</span>(<span class="type">int</span>[] <span class="parameter">arr</span>, <span class="type">int</span> <span class="parameter">elementoABuscar</span>) {
+        <span class="type">int</span> indiceInicio = <span class="number">0</span>;
+        <span class="type">int</span> indiceFin = arr.length - <span class="number">1</span>;
+
+        <span class="keyword">while</span> (indiceInicio &lt;= indiceFin) {
+            <span class="type">int</span> indiceMedio = indiceInicio + (indiceFin - indiceInicio) / <span class="number">2</span>; <span class="comment">// Evita desbordamiento</span>
+
+            <span class="comment">// Comprueba si el elemento está en el medio</span>
+            <span class="keyword">if</span> (arr[indiceMedio] == elementoABuscar) {
+                <span class="keyword">return</span> indiceMedio; <span class="comment">// Encontrado</span>
+            }
+
+            <span class="comment">// Si el elemento es mayor, ignora la mitad izquierda</span>
+            <span class="keyword">if</span> (arr[indiceMedio] &lt; elementoABuscar) {
+                indiceInicio = indiceMedio + <span class="number">1</span>;
+            }
+            <span class="comment">// Si el elemento es menor, ignora la mitad derecha</span>
+            <span class="keyword">else</span> {
+                indiceFin = indiceMedio - <span class="number">1</span>;
+            }
+        }
+        <span class="keyword">return</span> -<span class="number">1</span>; <span class="comment">// No encontrado</span>
+    }
+
+    <span class="comment">// Método auxiliar para imprimir (igual que antes)</span>
+    <span class="keyword">public static void</span> <span class="method-name">imprimir</span>(<span class="type">int</span> <span class="parameter">elemento</span>, <span class="type">int</span> <span class="parameter">indice</span>) {
+        <span class="keyword">if</span> (indice == -<span class="number">1</span>) {
+            System.out.println(elemento + <span class="string">" no encontrado."</span>);
+        } <span class="keyword">else</span> {
+            System.out.println(elemento + <span class="string">" encontrado en el índice: "</span> + indice);
+        }
+    }
+
+    <span class="keyword">public static void</span> <span class="method-name">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">int</span>[] miArreglo = {<span class="number">3</span>, <span class="number">22</span>, <span class="number">27</span>, <span class="number">47</span>, <span class="number">57</span>, <span class="number">67</span>, <span class="number">89</span>, <span class="number">91</span>, <span class="number">95</span>, <span class="number">99</span>}; <span class="comment">// ¡Debe estar ordenado!</span>
+        <span class="comment">// Si no estuviera ordenado: Arrays.sort(miArreglo);</span>
+
+        <span class="type">int</span> elementoBuscado = <span class="number">67</span>;
+        <span class="type">int</span> indiceEncontrado = <span class="method-name">busquedaBinaria</span>(miArreglo, elementoBuscado);
+        <span class="method-name">imprimir</span>(elementoBuscado, indiceEncontrado); <span class="comment">// Salida: 67 encontrado en el índice: 5</span>
+
+        elementoBuscado = <span class="number">50</span>;
+        indiceEncontrado = <span class="method-name">busquedaBinaria</span>(miArreglo, elementoBuscado);
+        <span class="method-name">imprimir</span>(elementoBuscado, indiceEncontrado); <span class="comment">// Salida: 50 no encontrado.</span>
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div id="slide-14" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Algoritmos de Ordenamiento <i class="fas fa-sort-amount-down ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Son procedimientos para <strong>reorganizar</strong> los elementos de una lista o vector en una <strong>secuencia específica</strong> (orden numérico, alfabético, etc.).</p>
+            <p class="text-lg text-gray-700 mb-4"><strong>Propósito principal:</strong> Facilitar la búsqueda y el acceso eficiente a la información.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Fundamentales en ciencias de la computación.</li>
+                <li>Optimizan otros algoritmos (como búsqueda binaria) que requieren datos ordenados.</li>
+                <li>Existen muchas técnicas, variando en eficiencia (tiempo y memoria) y complejidad.</li>
+                <li>Su eficiencia se describe a menudo con la notación O().</li>
+            </ul>
+            <p class="text-lg text-gray-700 font-semibold">Veremos tres métodos básicos: Burbuja, Inserción y Selección.</p>
+        </div>
+
+        <div id="slide-15" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Ordenamiento Burbuja (Bubble Sort) <i class="fas fa-water ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Método sencillo que revisa repetidamente pares de elementos <strong>adyacentes</strong> e intercambia si están en el orden incorrecto.</p>
+            <p class="text-lg text-gray-700 mb-4">Los elementos más "pesados" (mayores) "burbujean" hacia el final de la lista en cada pasada.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Fácil de implementar y entender.</li>
+                <li>Se repite el proceso hasta que una pasada completa no requiera intercambios.</li>
+                <li>Principalmente usado con fines educativos.</li>
+                <li><strong>Ineficiente</strong> para grandes cantidades de datos.</li>
+            </ul>
+             <p class="text-lg text-gray-700 mb-2"><strong>Eficiencia:</strong></p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-1 mb-6 pl-4">
+                 <li><strong>Complejidad:</strong> O(n^2) en el peor y caso promedio.</li>
+                 <li><strong>Memoria:</strong> O(1) adicional (ordenamiento in-place).</li>
+                 <li><strong>Estable:</strong> Mantiene el orden relativo de elementos iguales.</li>
+            </ul>
+        </div>
+
+        <div id="slide-16" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Ordenamiento Burbuja - Ejemplo <i class="fas fa-code ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Implementación en Java:</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="class-name">Burbuja</span> {
+
+    <span class="keyword">public static void</span> <span class="method-name">ordenamientoBurbuja</span>(<span class="type">int</span>[] <span class="parameter">arr</span>) {
+        <span class="type">int</span> n = arr.length;
+        <span class="type">boolean</span> intercambiado;
+        <span class="comment">// Ciclo externo: controla las pasadas</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i++) {
+            intercambiado = <span class="keyword">false</span>;
+            <span class="comment">// Ciclo interno: compara elementos adyacentes</span>
+            <span class="comment">// En cada pasada, el elemento más grande llega a su posición final</span>
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n - <span class="number">1</span> - i; j++) {
+                <span class="comment">// Si el elemento actual es mayor que el siguiente</span>
+                <span class="keyword">if</span> (arr[j] &gt; arr[j + <span class="number">1</span>]) {
+                    <span class="comment">// Intercambiar arr[j] y arr[j+1]</span>
+                    <span class="type">int</span> temp = arr[j];
+                    arr[j] = arr[j + <span class="number">1</span>];
+                    arr[j + <span class="number">1</span>] = temp;
+                    intercambiado = <span class="keyword">true</span>; <span class="comment">// Marcar que hubo un intercambio</span>
+                }
+            }
+            <span class="comment">// Si no hubo intercambios en esta pasada, el arreglo ya está ordenado</span>
+            <span class="keyword">if</span> (!intercambiado) {
+                <span class="keyword">break</span>;
+            }
+        }
+    }
+
+    <span class="keyword">public static void</span> <span class="method-name">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">int</span>[] goles = {<span class="number">2</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>};
+        System.out.println(<span class="string">"Arreglo inicial: "</span> + Arrays.toString(goles));
+
+        <span class="method-name">ordenamientoBurbuja</span>(goles);
+
+        System.out.println(<span class="string">"Arreglo ordenado (Burbuja): "</span> + Arrays.toString(goles));
+        <span class="comment">// Salida: Arreglo ordenado (Burbuja): [1, 2, 2, 3, 4, 5, 7, 7]</span>
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div id="slide-17" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Ordenamiento por Inserción <i class="fas fa-sign-in-alt ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Funciona construyendo la lista ordenada <strong>un elemento a la vez</strong>.</p>
+            <p class="text-lg text-gray-700 mb-4">Toma cada elemento de la parte desordenada y lo <strong>inserta en su posición correcta</strong> dentro de la parte ya ordenada, desplazando los elementos mayores.</p>
+            <p class="text-lg text-gray-700 mb-4">Es similar a como ordenamos cartas en la mano.</p>
+             <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                 <li>Simple y eficiente para listas <strong>pequeñas</strong> o <strong>casi ordenadas</strong>.</li>
+                 <li>Bueno para añadir elementos a una lista ya ordenada.</li>
+                 <li>Generalmente más rápido que Burbuja en la práctica.</li>
+            </ul>
+             <p class="text-lg text-gray-700 mb-2"><strong>Eficiencia:</strong></p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-1 mb-6 pl-4">
+                 <li><strong>Complejidad:</strong> O(n^2) en el peor y caso promedio. O(n) en el mejor caso (lista ya ordenada).</li>
+                 <li><strong>Memoria:</strong> O(1) adicional (in-place).</li>
+                 <li><strong>Estable:</strong> Mantiene el orden relativo de elementos iguales.</li>
+            </ul>
+        </div>
+
+         <div id="slide-18" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Ordenamiento por Inserción - Ejemplo <i class="fas fa-code ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Implementación en Java:</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="class-name">Insercion</span> {
+
+    <span class="keyword">public static void</span> <span class="method-name">ordenamientoInsercion</span>(<span class="type">int</span>[] <span class="parameter">arr</span>) {
+        <span class="type">int</span> n = arr.length;
+        <span class="comment">// Itera desde el segundo elemento (índice 1)</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; ++i) {
+            <span class="type">int</span> elementoActual = arr[i]; <span class="comment">// El elemento a insertar</span>
+            <span class="type">int</span> j = i - <span class="number">1</span>; <span class="comment">// Índice del último elemento de la parte ordenada</span>
+
+            <span class="comment">/* Mueve los elementos de arr[0..i-1] que son
+               mayores que elementoActual, una posición hacia adelante
+               de su posición actual */</span>
+            <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; arr[j] &gt; elementoActual) {
+                arr[j + <span class="number">1</span>] = arr[j]; <span class="comment">// Desplaza el elemento mayor</span>
+                j = j - <span class="number">1</span>;
+            }
+            arr[j + <span class="number">1</span>] = elementoActual; <span class="comment">// Inserta el elemento en su posición correcta</span>
+        }
+    }
+
+    <span class="keyword">public static void</span> <span class="method-name">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">int</span>[] goles = {<span class="number">2</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>};
+        System.out.println(<span class="string">"Arreglo inicial: "</span> + Arrays.toString(goles));
+
+        <span class="method-name">ordenamientoInsercion</span>(goles);
+
+        System.out.println(<span class="string">"Arreglo ordenado (Inserción): "</span> + Arrays.toString(goles));
+        <span class="comment">// Salida: Arreglo ordenado (Inserción): [1, 2, 2, 3, 4, 5, 7, 7]</span>
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div id="slide-19" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Ordenamiento por Selección <i class="fas fa-check-square ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Divide la lista en dos partes: ordenada y desordenada.</p>
+            <p class="text-lg text-gray-700 mb-4">En cada paso, encuentra el elemento <strong>mínimo</strong> (o máximo) de la parte <strong>desordenada</strong> y lo <strong>intercambia</strong> con el primer elemento de esa parte desordenada.</p>
+            <p class="text-lg text-gray-700 mb-4">La parte ordenada crece en un elemento en cada iteración.</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-2 mb-6 pl-4">
+                <li>Simple de conceptualizar.</li>
+                <li>Realiza un número fijo de intercambios O(n), lo cual puede ser útil si escribir en memoria es costoso.</li>
+                <li>Siempre realiza todas las pasadas, incluso si la lista ya está ordenada.</li>
+            </ul>
+            <p class="text-lg text-gray-700 mb-2"><strong>Eficiencia:</strong></p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-1 mb-6 pl-4">
+                 <li><strong>Complejidad:</strong> O(n^2) en todos los casos (peor, promedio, mejor).</li>
+                 <li><strong>Memoria:</strong> O(1) adicional (in-place).</li>
+                 <li><strong>Inestable:</strong> Puede cambiar el orden relativo de elementos iguales.</li>
+            </ul>
+        </div>
+
+        <div id="slide-20" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Ordenamiento por Selección - Ejemplo <i class="fas fa-code ml-2 text-indigo-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Implementación en Java:</p>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                </button>
+                <pre><code class="language-java"><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="class-name">Seleccion</span> {
+
+    <span class="keyword">public static void</span> <span class="method-name">ordenamientoSeleccion</span>(<span class="type">int</span>[] <span class="parameter">arr</span>) {
+        <span class="type">int</span> n = arr.length;
+
+        <span class="comment">// Mueve el límite de la sublista desordenada</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i++) {
+            <span class="comment">// Encuentra el elemento mínimo en la sublista desordenada arr[i..n-1]</span>
+            <span class="type">int</span> indiceMinimo = i;
+            <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; n; j++) {
+                <span class="keyword">if</span> (arr[j] &lt; arr[indiceMinimo]) {
+                    indiceMinimo = j;
+                }
+            }
+
+            <span class="comment">// Intercambia el elemento mínimo encontrado con el primer</span>
+            <span class="comment">// elemento de la parte desordenada (arr[i])</span>
+            <span class="type">int</span> temp = arr[indiceMinimo];
+            arr[indiceMinimo] = arr[i];
+            arr[i] = temp;
+        }
+    }
+
+     <span class="keyword">public static void</span> <span class="method-name">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">int</span>[] goles = {<span class="number">2</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>};
+        System.out.println(<span class="string">"Arreglo inicial: "</span> + Arrays.toString(goles));
+
+        <span class="method-name">ordenamientoSeleccion</span>(goles);
+
+        System.out.println(<span class="string">"Arreglo ordenado (Selección): "</span> + Arrays.toString(goles));
+        <span class="comment">// Salida: Arreglo ordenado (Selección): [1, 2, 2, 3, 4, 5, 7, 7]</span>
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div id="slide-21" class="slide">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 fade-in-down">Conclusiones Clave <i class="fas fa-check-circle ml-2 text-green-500"></i></h2>
+            <p class="text-lg text-gray-700 mb-4">Hemos explorado herramientas fundamentales para manejar datos:</p>
+            <ul class="list-disc list-inside text-lg text-gray-700 space-y-3 mb-6 pl-4">
+                <li>Las <strong>Estructuras de Datos</strong> (como los arreglos) nos permiten organizar la información.</li>
+                <li>Los <strong>Arreglos</strong> son colecciones estáticas y homogéneas, accesibles por índices (1D, 2D, Multi-D).</li>
+                <li>Los <strong>Algoritmos de Búsqueda</strong> localizan elementos.
+                    <ul>
+                        <li><strong>Secuencial:</strong> Simple, para cualquier lista O(n).</li>
+                        <li><strong>Binaria:</strong> Eficiente, para listas ordenadas O(log n).</li>
+                    </ul>
+                </li>
+                 <li>Los <strong>Algoritmos de Ordenamiento</strong> organizan los datos.
+                    <ul>
+                        <li><strong>Burbuja, Inserción, Selección:</strong> Métodos básicos, fáciles de entender pero generalmente O(n^2), menos eficientes para datos grandes.</li>
+                    </ul>
+                </li>
+                <li>La elección correcta de estructuras y algoritmos impacta directamente en la <strong>eficiencia</strong> del software.</li>
+            </ul>
+             <p class="text-lg text-gray-700 font-semibold">¡Comprender estos conceptos es esencial para desarrollar algoritmos y programas efectivos!</p>
+        </div>
+
+        <div class="navigation">
+            <button id="prevBtn" class="nav-button" onclick="changeSlide(-1)" disabled> <i class="fas fa-arrow-left mr-2"></i> Anterior
+            </button>
+            <span id="slideCounter" class="slide-counter">1 / 21</span>
+            <button id="nextBtn" class="nav-button" onclick="changeSlide(1)"> Siguiente <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        // IMPORTANTE: Actualizar este valor al número total de diapositivas
+        const totalSlides = 21;
+
+        // Función para mostrar la diapositiva actual y ocultar las demás
+        function showSlide(slideIndex) {
+            // Ocultar todas las diapositivas y quitar la clase 'active'
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+                // Reiniciar animación para que ocurra cada vez que se muestra
+                slide.querySelectorAll('.fade-in-down').forEach(el => {
+                    el.style.animation = 'none';
+                    // Forzar reflow para reiniciar la animación
+                    el.offsetHeight; /* trigger reflow */
+                    el.style.animation = null;
+                });
+            });
+
+            // Mostrar la diapositiva solicitada
+            const targetSlide = document.getElementById(`slide-${slideIndex}`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                 // Aplicar animación a los elementos correspondientes en la nueva diapositiva activa
+                targetSlide.querySelectorAll('.fade-in-down').forEach(el => {
+                     el.style.animation = 'fadeInDown 0.6s ease-out forwards';
+                     // Considerar aplicar delays si existen
+                     if(el.style.animationDelay) {
+                         el.style.animationDelay = el.style.animationDelay; // Re-aplicar delay si existe
+                     }
+                });
+                 // Asegurar que la diapositiva se scrollee hasta arriba al mostrarse
+                 targetSlide.scrollTop = 0;
+            }
+
+            // Actualizar estado de los botones de navegación
+            document.getElementById('prevBtn').disabled = slideIndex === 1;
+            document.getElementById('nextBtn').disabled = slideIndex === totalSlides;
+
+            // Actualizar contador de diapositivas
+            document.getElementById('slideCounter').textContent = `${slideIndex} / ${totalSlides}`;
+        }
+
+        // Función para cambiar de diapositiva (siguiente/anterior)
+        function changeSlide(direction) {
+            const newSlideIndex = currentSlide + direction;
+            if (newSlideIndex >= 1 && newSlideIndex <= totalSlides) {
+                currentSlide = newSlideIndex;
+                showSlide(currentSlide);
+            }
+        }
+
+        // --- NUEVA FUNCIÓN copyCode ---
+        // Función para copiar el código al portapapeles usando document.execCommand como fallback
+        function copyCode(buttonElement) {
+            // Encuentra el elemento <pre> más cercano
+            const preElement = buttonElement.closest('.code-block-wrapper').querySelector('pre');
+            // Encuentra el elemento <code> dentro de <pre>
+            const codeElement = preElement.querySelector('code');
+            // Extraer el texto, manejando posibles elementos hijos (como <span> para highlighting)
+            let codeToCopy = '';
+            codeElement.childNodes.forEach(node => {
+                 codeToCopy += node.textContent; // Usar textContent para obtener texto de nodos y elementos anidados
+            });
+             codeToCopy = codeToCopy.trim(); // Limpiar espacios extra
+
+            let success = false; // Variable para rastrear el éxito
+
+            // Intenta usar la API moderna primero (si está disponible y permitida)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    success = true;
+                    // Éxito al copiar: cambia el texto y estilo del botón temporalmente
+                    buttonElement.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                    buttonElement.classList.add('copied');
+                    buttonElement.classList.remove('error'); // Asegurar que no tenga clase de error
+
+                    // Vuelve al estado original después de 2 segundos
+                    setTimeout(() => {
+                        buttonElement.innerHTML = '<i class="far fa-copy"></i> Copiar';
+                        buttonElement.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.warn('API Clipboard falló, intentando execCommand:', err);
+                    // Si falla la API moderna, intenta el método execCommand (ver abajo)
+                    fallbackCopyTextToClipboard(codeToCopy, buttonElement);
+                });
+            } else {
+                // Si la API moderna no está disponible, usa directamente execCommand
+                console.warn('API Clipboard no disponible, usando execCommand.');
+                fallbackCopyTextToClipboard(codeToCopy, buttonElement);
+            }
+        }
+
+        // Función de fallback usando document.execCommand
+        function fallbackCopyTextToClipboard(text, buttonElement) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            // Evitar que se vea el textarea
+            textArea.style.position = 'fixed';
+            textArea.style.top = '-9999px';
+            textArea.style.left = '-9999px';
+            textArea.style.opacity = '0';
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+                if (success) {
+                    // Éxito al copiar: cambia el texto y estilo del botón temporalmente
+                    buttonElement.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                    buttonElement.classList.add('copied');
+                    buttonElement.classList.remove('error');
+                } else {
+                    throw new Error('execCommand devolvió false'); // Forzar error si execCommand falla silenciosamente
+                }
+            } catch (err) {
+                console.error('Fallback execCommand falló al copiar:', err);
+                // Error al copiar: cambia el texto y estilo del botón
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> Error';
+                buttonElement.classList.add('error'); // Añadir clase de error
+                buttonElement.classList.remove('copied');
+            }
+
+            document.body.removeChild(textArea); // Limpiar el textarea temporal
+
+            // Vuelve al estado original después de 2 segundos (incluso si hubo error)
+            setTimeout(() => {
+                buttonElement.innerHTML = '<i class="far fa-copy"></i> Copiar';
+                buttonElement.classList.remove('copied');
+                buttonElement.classList.remove('error');
+            }, 2000);
+        }
+        // --- FIN NUEVA FUNCIÓN copyCode ---
+
+
+        // Inicializar la presentación mostrando la primera diapositiva
+        document.addEventListener('DOMContentLoaded', () => {
+            // Asegurarse de que totalSlides tenga el valor correcto
+             const slides = document.querySelectorAll('.slide');
+             if (slides.length !== totalSlides) {
+                 console.warn(`Advertencia: El número de elementos .slide (${slides.length}) no coincide con totalSlides (${totalSlides}). Ajustando totalSlides.`);
+             }
+
+            showSlide(currentSlide);
+            // Asegurarse que todos los botones de copia tengan el texto inicial correcto
+             document.querySelectorAll('.copy-button').forEach(button => {
+                 button.innerHTML = '<i class="far fa-copy"></i> Copiar';
+             });
+        });
+
+         // Permitir navegación con teclas de flecha izquierda/derecha
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                // Solo avanzar si el botón 'Siguiente' está habilitado
+                if (!document.getElementById('nextBtn').disabled) {
+                    changeSlide(1);
+                }
+            } else if (event.key === 'ArrowLeft') {
+                 // Solo retroceder si el botón 'Anterior' está habilitado
+                if (!document.getElementById('prevBtn').disabled) {
+                    changeSlide(-1);
+                }
+            }
+        });
+
+    </script>
+
+</body>
+</html>

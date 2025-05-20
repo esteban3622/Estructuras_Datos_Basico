@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducción a las Estructuras de Datos Dinámicas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos base y personalizados */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .presentation-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            padding: 1rem;
+        }
+        .slide {
+            display: none; opacity: 0; transition: opacity 0.5s ease-in-out;
+            min-height: calc(100vh - 100px); border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: white; padding: 2rem 2.5rem; margin-bottom: 1rem;
+            overflow-y: auto; max-height: calc(100vh - 100px);
+        }
+        .slide.active { display: block; opacity: 1; }
+        .navigation {
+            margin-top: auto; padding-top: 1rem; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .nav-button {
+            background-color: rgba(255, 255, 255, 0.85); color: #1e40af;
+            padding: 0.75rem 1.5rem; border-radius: 9999px; border: none; cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: 600; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover { background-color: rgba(255, 255, 255, 1); }
+        .nav-button:active { transform: scale(0.95); }
+        .nav-button:disabled { background-color: rgba(200, 200, 200, 0.6); cursor: not-allowed; opacity: 0.7; }
+        .slide-counter { color: white; font-weight: 500; font-size: 0.9rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .code-block-wrapper { position: relative; margin-top: 1rem; margin-bottom: 1.5rem; }
+        pre {
+            background-color: #1f2937; color: #d1d5db; padding: 1.5rem; padding-top: 3.5rem;
+            border-radius: 0.5rem; overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6;
+            border: 1px solid #374151;
+             user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+        }
+        code { font-family: inherit; }
+        /* Clases para resaltado de sintaxis Java */
+        .code-keyword { color: #60a5fa; font-weight: bold; }
+        .code-type { color: #4ade80; }
+        .code-class { color: #34d399; font-weight: bold;}
+        .code-method { color: #facc15; }
+        .code-parameter { color: #f87171; }
+        .code-comment { color: #9ca3af; font-style: italic; }
+        .code-string { color: #fb923c; }
+        .code-number { color: #a78bfa; }
+        .code-annotation { color: #eab308; }
+        .code-field { color: #c4b5fd; }
+        .code-literal { color: #5eead4; }
+
+        .copy-button {
+            position: absolute; top: 0.75rem; right: 0.75rem; background-color: #4b5563;
+            color: #f3f4f6; border: none; padding: 0.4rem 0.8rem; border-radius: 0.375rem;
+            cursor: pointer; font-size: 0.8rem; font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+            opacity: 0.75; min-width: 100px; text-align: center;
+        }
+        .copy-button:hover { background-color: #6b7280; opacity: 1; }
+        .copy-button i { margin-right: 0.4rem; }
+        .copy-button.copied { background-color: #10b981; color: white; opacity: 1; }
+        .copy-button.error { background-color: #ef4444; color: white; opacity: 1; font-size: 0.75rem; }
+        .copy-button.not-supported { background-color: #f97316; color: white; opacity: 1; }
+        .fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+        h1, h2, h3 { color: #1f2937; }
+        p, li { color: #374151; line-height: 1.6; }
+        strong { color: #3b82f6; }
+        code:not(pre code) { background-color: #e0f2fe; color: #0ea5e9; padding: 0.2em 0.4em; border-radius: 0.25rem; font-size: 0.85em; }
+        ul { list-style-position: outside; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        .diagram-placeholder {
+            border: 2px dashed #9ca3af; background-color: #f3f4f6; padding: 1.5rem;
+            text-align: center; color: #6b7280; border-radius: 0.5rem; margin-top: 1rem;
+        }
+        .diagram-placeholder i { font-size: 2rem; margin-bottom: 0.5rem; color: #9ca3af; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="presentation-container">
+
+        <div id="slide-1" class="slide active">
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 fade-in-down">
+                    Introducción a las Estructuras de Datos Dinámicas
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-8 fade-in-down" style="animation-delay: 0.2s;">
+                    Flexibilidad y Eficiencia en la Gestión de Datos
+                </p>
+                <i class="fas fa-project-diagram text-6xl text-cyan-500 fade-in-down" style="animation-delay: 0.4s;"></i>
+                <p class="mt-10 text-gray-500 text-sm">
+                    Estructuras de Datos y Algoritmos
+                </p>
+            </div>
+        </div>
+
+        <div id="slide-2" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-question-circle mr-2 text-cyan-600"></i> ¿Qué son las Estructuras Dinámicas?
+            </h2>
+            <p class="text-lg mb-4">
+                Son colecciones de datos cuyo <strong>tamaño puede cambiar durante la ejecución</strong> del programa. A diferencia de las estructuras estáticas (como los arrays básicos), no necesitan tener un tamaño fijo predefinido.
+            </p>
+            <p class="text-lg mb-4">
+                Se construyen utilizando bloques de memoria (llamados <strong>nodos</strong>) que se enlazan entre sí mediante <strong>referencias</strong> (similares a los punteros en otros lenguajes).
+            </p>
+             <h3 class="text-2xl font-semibold mt-6 mb-3">¿Por qué son necesarias?</h3>
+            <ul class="list-disc text-lg mb-6 space-y-2">
+                <li>Cuando <strong>no sabemos cuántos datos</strong> vamos a almacenar de antemano.</li>
+                <li>Para representar relaciones complejas entre datos (ej. árboles genealógicos, redes sociales).</li>
+                <li>Para optimizar ciertas operaciones de <strong>inserción y eliminación</strong> en medio de la colección.</li>
+            </ul>
+             <div class="bg-cyan-50 border-l-4 border-cyan-500 text-cyan-700 p-4 mt-6 rounded-md" role="alert">
+                <p class="font-bold"><i class="fas fa-lightbulb mr-2"></i>Idea Clave:</p>
+                <p>La memoria se solicita y se libera "bajo demanda", adaptándose a las necesidades del momento.</p>
+            </div>
+        </div>
+
+        <div id="slide-3" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-balance-scale mr-2 text-cyan-600"></i> Dinámicas vs. Estáticas (Arrays)
+            </h2>
+            <p class="text-lg mb-4">Comparemos las estructuras dinámicas con los arrays tradicionales:</p>
+            <div class="grid md:grid-cols-2 gap-6 mt-6">
+                <div class="bg-green-50 p-4 rounded-lg shadow border-l-4 border-green-500">
+                    <h3 class="font-semibold text-green-800 text-xl mb-2"><i class="fas fa-plus-circle mr-2"></i> Ventajas Dinámicas</h3>
+                    <ul class="list-disc text-green-700 space-y-1 pl-5">
+                        <li><strong>Tamaño Flexible:</strong> Crecen y decrecen según sea necesario.</li>
+                        <li><strong>Inserción/Eliminación Eficiente (en ciertos casos):</strong> Añadir o quitar elementos en medio puede ser más rápido que en arrays (que requieren desplazar elementos).</li>
+                    </ul>
+                </div>
+                 <div class="bg-red-50 p-4 rounded-lg shadow border-l-4 border-red-500">
+                    <h3 class="font-semibold text-red-800 text-xl mb-2"><i class="fas fa-minus-circle mr-2"></i> Desventajas Dinámicas</h3>
+                     <ul class="list-disc text-red-700 space-y-1 pl-5">
+                        <li><strong>Gestión de Memoria:</strong> Requieren manejar referencias/punteros (aunque Java lo facilita con el recolector de basura).</li>
+                        <li><strong>Acceso No Directo:</strong> Para acceder a un elemento N, generalmente hay que recorrer los N-1 anteriores (más lento que el acceso indexado <code>array[i]</code>).</li>
+                        <li><strong>Overhead de Memoria:</strong> Cada nodo necesita espacio extra para almacenar la(s) referencia(s).</li>
+                    </ul>
+                </div>
+            </div>
+             <p class="text-lg mt-6 font-medium text-center">
+                La elección depende de las necesidades específicas del problema: ¿Tamaño fijo o variable? ¿Acceso rápido por índice o inserciones/eliminaciones frecuentes?
+             </p>
+        </div>
+
+        <div id="slide-4" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-memory mr-2 text-cyan-600"></i> Gestión de Memoria Dinámica en Java
+            </h2>
+            <p class="text-lg mb-4">
+                En lenguajes como C/C++, el programador gestiona manualmente la memoria dinámica usando <code>malloc/free</code> o <code>new/delete</code>. Esto es potente pero propenso a errores (fugas de memoria, accesos inválidos).
+            </p>
+            <p class="text-lg mb-4">
+                <strong>Java simplifica esto enormemente</strong> gracias a la <strong>Gestión Automática de Memoria</strong> (Recolector de Basura - Garbage Collector, GC).
+            </p>
+             <ul class="list-disc text-lg mb-6 space-y-2">
+                <li><strong>Asignación (<code>new</code>):</strong> Cuando creamos un objeto (como un nodo) con el operador <code>new</code>, Java busca espacio en una zona de memoria llamada <strong>Heap</strong> y nos devuelve una <strong>referencia</strong> a ese objeto.</li>
+                <li><strong>Desasignación (Automática):</strong> El <strong>Recolector de Basura (GC)</strong> se ejecuta periódicamente. Identifica los objetos en el Heap que ya <strong>no son referenciados</strong> por ninguna parte activa del programa (son "basura") y libera automáticamente la memoria que ocupaban.</li>
+            </ul>
+             <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mt-6 rounded-md" role="alert">
+                <p class="font-bold"><i class="fas fa-robot mr-2"></i>Beneficio Principal:</p>
+                <p>Como programadores Java, nos enfocamos en la lógica de la estructura de datos, y el GC se encarga (en gran medida) de la limpieza de la memoria, previniendo muchos errores comunes.</p>
+            </div>
+            <p class="text-lg mt-4">
+                Aunque sea automático, entender que los objetos se crean en el Heap y se accede a ellos mediante referencias es fundamental para trabajar con estructuras dinámicas.
+            </p>
+        </div>
+
+        <div id="slide-5" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-link mr-2 text-cyan-600"></i> Referencias en Java
+            </h2>
+            <p class="text-lg mb-4">
+                En Java, no trabajamos directamente con direcciones de memoria como en C/C++. En su lugar, usamos <strong>referencias</strong>.
+            </p>
+             <p class="text-lg mb-4">
+                Una variable de tipo objeto (cualquier cosa que no sea un tipo primitivo como <code>int</code>, <code>float</code>, <code>boolean</code>) no almacena el objeto en sí, sino una <strong>referencia</strong> que "apunta" a la ubicación del objeto real en el Heap.
+            </p>
+             <h3 class="text-2xl font-semibold mt-6 mb-3">Propósito en Estructuras Dinámicas:</h3>
+             <ul class="list-disc text-lg mb-6 space-y-2">
+                <li><strong>Enlazar Nodos:</strong> Son el "pegamento" que conecta un nodo con el siguiente (y/o el anterior). Un nodo contiene una referencia a otro nodo.</li>
+                <li><strong>Marcar el Fin:</strong> La referencia especial <code>null</code> indica que no se apunta a ningún objeto. Se usa comúnmente para marcar el final de una lista o la ausencia de un hijo en un árbol.</li>
+             </ul>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                 </button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Declaración de una variable de referencia a un objeto String</span>
+<span class="code-type">String</span> <span class="code-field">miTexto</span>;
+
+<span class="code-comment">// Creación de un objeto String en el Heap y asignación de su referencia a miTexto</span>
+miTexto = <span class="code-keyword">new</span> <span class="code-type">String</span>(<span class="code-string">"Hola"</span>);
+
+<span class="code-comment">// Otra referencia apuntando AL MISMO objeto</span>
+<span class="code-type">String</span> <span class="code-field">otroTexto</span> = miTexto;
+
+<span class="code-comment">// Variable de referencia que no apunta a ningún objeto</span>
+<span class="code-type">String</span> <span class="code-field">textoVacio</span> = <span class="code-literal">null</span>;
+
+<span class="code-comment">// Ejemplo con una clase Nodo (la definiremos luego)</span>
+<span class="code-comment">// Nodo miNodo = new Nodo(10); // Crea un nodo</span>
+<span class="code-comment">// Nodo siguienteNodo = miNodo; // 'siguienteNodo' referencia al mismo objeto que 'miNodo'</span>
+<span class="code-comment">// miNodo.siguiente = new Nodo(20); // El campo 'siguiente' de miNodo ahora referencia a un NUEVO nodo</span>
+                 </code></pre>
+             </div>
+             <div class="diagram-placeholder">
+                 <i class="fas fa-pencil-ruler"></i>
+                 <p><strong>Visualización Crucial:</strong> Es fundamental dibujar diagramas de cajas y flechas para entender cómo las referencias conectan los objetos en memoria.</p>
+             </div>
+        </div>
+
+        <div id="slide-6" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cube mr-2 text-cyan-600"></i> Nodos: Los Bloques de Construcción
+            </h2>
+            <p class="text-lg mb-4">
+                Un <strong>nodo</strong> es el componente fundamental de la mayoría de las estructuras de datos enlazadas (listas, árboles, etc.). Es como un ladrillo que contiene información y sabe cómo conectarse a otros ladrillos.
+            </p>
+            <h3 class="text-2xl font-semibold mt-6 mb-3">Componentes Típicos de un Nodo:</h3>
+            <ul class="list-disc text-lg mb-6 space-y-2">
+                <li><strong>Campo(s) de Datos:</strong> Almacena la información útil que queremos guardar (un número, un nombre, un objeto complejo, etc.).</li>
+                <li><strong>Campo(s) de Enlace (Referencias):</strong> Una o más variables de referencia que apuntan a otros nodos, estableciendo la conexión dentro de la estructura.
+                    <ul>
+                        <li class="text-base mt-1">En listas simplemente enlazadas: una referencia al nodo <code>siguiente</code>.</li>
+                        <li class="text-base">En listas doblemente enlazadas: referencias al nodo <code>siguiente</code> y al <code>anterior</code>.</li>
+                        <li class="text-base">En árboles binarios: referencias al hijo <code>izquierdo</code> y al hijo <code>derecho</code>.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p class="text-lg mb-4">
+                Se definen como <strong>clases auto-referenciadas</strong>, lo que significa que la definición de la clase `Nodo` incluye campos cuyo tipo es la propia clase `Nodo`.
+            </p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)">
+                    <i class="far fa-copy"></i> Copiar
+                 </button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Definición de una clase Nodo simple para una lista enlazada (con un dato entero)</span>
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">Nodo</span> {
+    <span class="code-comment">// Campo de Datos</span>
+    <span class="code-type">int</span> <span class="code-field">dato</span>;
+
+    <span class="code-comment">// Campo de Enlace (Referencia al siguiente Nodo)</span>
+    <span class="code-class">Nodo</span> <span class="code-field">siguiente</span>; <span class="code-comment">// ¡Auto-referencia!</span>
+
+    <span class="code-comment">// Constructor para crear un nuevo nodo</span>
+    <span class="code-keyword">public</span> <span class="code-method">Nodo</span>(<span class="code-type">int</span> <span class="code-parameter">valorDato</span>) {
+        <span class="code-keyword">this</span>.<span class="code-field">dato</span> = valorDato;
+        <span class="code-keyword">this</span>.<span class="code-field">siguiente</span> = <span class="code-literal">null</span>; <span class="code-comment">// Por defecto, un nuevo nodo no apunta a nada</span>
+    }
+
+    <span class="code-comment">// (Opcional) Métodos getter/setter si se necesitan</span>
+    <span class="code-comment">// public int getDato() { return dato; }</span>
+    <span class="code-comment">// public Nodo getSiguiente() { return siguiente; }</span>
+    <span class="code-comment">// public void setSiguiente(Nodo sig) { this.siguiente = sig; }</span>
+}
+                 </code></pre>
+            </div>
+             <div class="diagram-placeholder">
+                 <i class="fas fa-box"></i> <i class="fas fa-arrow-right"></i> <i class="fas fa-box"></i>
+                 <p><strong>Visualización:</strong> Se suelen dibujar como cajas divididas: una parte para los datos y otra(s) para la(s) referencia(s) (flechas).</p>
+             </div>
+        </div>
+
+        <div id="slide-7" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-stream mr-2 text-cyan-600"></i> Listas Lineales Simplemente Enlazadas
+            </h2>
+            <p class="text-lg mb-4">
+                Una secuencia lineal de nodos donde cada nodo contiene datos y una <strong>única referencia</strong> que apunta al <strong>siguiente nodo</strong> en la secuencia.
+            </p>
+            <h3 class="text-2xl font-semibold mt-6 mb-3">Estructura:</h3>
+            <ul class="list-disc text-lg mb-6 space-y-2">
+                <li><strong>Cabeza (Head):</strong> Una referencia que apunta al <strong>primer nodo</strong> de la lista. Si la lista está vacía, <code>head</code> es <code>null</code>.</li>
+                <li><strong>Nodos:</strong> Cada nodo contiene su dato y la referencia <code>siguiente</code>.</li>
+                <li><strong>Final:</strong> El campo <code>siguiente</code> del <strong>último nodo</strong> de la lista siempre apunta a <code>null</code>.</li>
+            </ul>
+             <div class="diagram-placeholder">
+                 <i class="fas fa-list-ol"></i>
+                 <p><strong>Visualización:</strong> head -> [Dato|Sig] -> [Dato|Sig] -> ... -> [Dato|null]</p>
+             </div>
+            <p class="text-lg mt-4">
+                Permiten un recorrido eficiente en una sola dirección (hacia adelante).
+            </p>
+        </div>
+
+        <div id="slide-8" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-cyan-600"></i> Listas Simples: Operaciones Básicas (1)
+            </h2>
+
+            <h3 class="text-2xl font-semibold mt-2 mb-3">1. Creación de una Lista Vacía</h3>
+            <p class="text-lg mb-4">Simplemente se inicializa la referencia <code>head</code> a <code>null</code>.</p>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">ListaSimpleEnlazada</span> {
+    <span class="code-class">Nodo</span> <span class="code-field">head</span>; <span class="code-comment">// Referencia al primer nodo</span>
+
+    <span class="code-comment">// Constructor: crea una lista vacía</span>
+    <span class="code-keyword">public</span> <span class="code-method">ListaSimpleEnlazada</span>() {
+        <span class="code-keyword">this</span>.<span class="code-field">head</span> = <span class="code-literal">null</span>;
+    }
+    <span class="code-comment">// ... (resto de métodos de la lista)</span>
+}</code></pre>
+            </div>
+
+            <h3 class="text-2xl font-semibold mt-6 mb-3">2. Inserción al Inicio</h3>
+            <p class="text-lg mb-4">Es la operación de inserción más eficiente:</p>
+            <ol class="list-decimal text-lg mb-4 pl-5 space-y-1">
+                <li>Crear un nuevo nodo con el dato deseado.</li>
+                <li>Hacer que la referencia <code>siguiente</code> del nuevo nodo apunte a lo que actualmente apunta <code>head</code> (el antiguo primer nodo, o <code>null</code> si la lista estaba vacía).</li>
+                <li>Actualizar <code>head</code> para que apunte al nuevo nodo.</li>
+            </ol>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Dentro de la clase ListaSimpleEnlazada</span>
+<span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">insertarAlInicio</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+    <span class="code-comment">// 1. Crear nuevo nodo</span>
+    <span class="code-class">Nodo</span> <span class="code-field">nuevoNodo</span> = <span class="code-keyword">new</span> <span class="code-class">Nodo</span>(dato);
+
+    <span class="code-comment">// 2. El siguiente del nuevo nodo es la cabeza actual</span>
+    nuevoNodo.<span class="code-field">siguiente</span> = <span class="code-keyword">this</span>.<span class="code-field">head</span>;
+
+    <span class="code-comment">// 3. La nueva cabeza es el nuevo nodo</span>
+    <span class="code-keyword">this</span>.<span class="code-field">head</span> = nuevoNodo;
+}</code></pre>
+            </div>
+        </div>
+
+        <div id="slide-9" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-cyan-600"></i> Listas Simples: Operaciones Básicas (2)
+            </h2>
+
+            <h3 class="text-2xl font-semibold mt-2 mb-3">3. Recorrido</h3>
+            <p class="text-lg mb-4">Visitar cada nodo de la lista, usualmente para imprimir sus datos o realizar alguna operación.</p>
+            <ol class="list-decimal text-lg mb-4 pl-5 space-y-1">
+                <li>Empezar con una referencia temporal (ej. <code>actual</code>) apuntando a <code>head</code>.</li>
+                <li>Mientras <code>actual</code> no sea <code>null</code>:
+                    <ul>
+                        <li class="text-base mt-1">Procesar el dato del nodo <code>actual</code> (ej. imprimirlo).</li>
+                        <li class="text-base">Mover <code>actual</code> al siguiente nodo (<code>actual = actual.siguiente</code>).</li>
+                    </ul>
+                </li>
+            </ol>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Dentro de la clase ListaSimpleEnlazada</span>
+<span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">imprimirLista</span>() {
+    <span class="code-class">Nodo</span> <span class="code-field">actual</span> = <span class="code-keyword">this</span>.<span class="code-field">head</span>; <span class="code-comment">// Empezar en la cabeza</span>
+    System.<span class="code-type">out</span>.<span class="code-method">print</span>(<span class="code-string">"Lista: "</span>);
+    <span class="code-keyword">while</span> (actual != <span class="code-literal">null</span>) {
+        System.<span class="code-type">out</span>.<span class="code-method">print</span>(actual.<span class="code-field">dato</span> + <span class="code-string">" -> "</span>); <span class="code-comment">// Procesar (imprimir)</span>
+        actual = actual.<span class="code-field">siguiente</span>; <span class="code-comment">// Mover al siguiente</span>
+    }
+    System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"null"</span>); <span class="code-comment">// Indicar el final</span>
+}</code></pre>
+            </div>
+
+            <h3 class="text-2xl font-semibold mt-6 mb-3">4. Inserción al Final (Esbozo)</h3>
+            <p class="text-lg mb-4">Requiere recorrer la lista hasta encontrar el último nodo (cuyo <code>siguiente</code> es <code>null</code>) y enlazar el nuevo nodo allí. Si la lista está vacía, es igual que insertar al inicio.</p>
+
+            <h3 class="text-2xl font-semibold mt-6 mb-3">5. Búsqueda y Eliminación (Esbozo)</h3>
+            <p class="text-lg mb-4">La <strong>búsqueda</strong> implica recorrer la lista comparando datos. La <strong>eliminación</strong> requiere encontrar el nodo a eliminar Y tener una referencia a su nodo <strong>anterior</strong> para poder "saltarlo" re-enlazando <code>anterior.siguiente</code>.</p>
+
+        </div>
+
+         <div id="slide-10" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-check-double mr-2 text-cyan-600"></i> Listas Simples: Ventajas y Desventajas
+            </h2>
+             <div class="grid md:grid-cols-2 gap-6 mt-6">
+                <div class="bg-green-50 p-4 rounded-lg shadow border-l-4 border-green-500">
+                    <h3 class="font-semibold text-green-800 text-xl mb-2"><i class="fas fa-thumbs-up mr-2"></i> Ventajas</h3>
+                    <ul class="list-disc text-green-700 space-y-1 pl-5">
+                        <li><strong>Tamaño Dinámico:</strong> Se adaptan a la cantidad de datos.</li>
+                        <li><strong>Inserción/Eliminación al Inicio:</strong> Muy eficiente (O(1)).</li>
+                        <li><strong>Uso de Memoria:</strong> Ligeramente menor que listas doblemente enlazadas (solo una referencia por nodo).</li>
+                    </ul>
+                </div>
+                 <div class="bg-red-50 p-4 rounded-lg shadow border-l-4 border-red-500">
+                    <h3 class="font-semibold text-red-800 text-xl mb-2"><i class="fas fa-thumbs-down mr-2"></i> Desventajas</h3>
+                     <ul class="list-disc text-red-700 space-y-1 pl-5">
+                        <li><strong>Acceso Secuencial:</strong> Lento para acceder a elementos por posición (O(n)).</li>
+                        <li><strong>Recorrido Unidireccional:</strong> Solo se puede avanzar.</li>
+                        <li><strong>Eliminación Ineficiente (general):</strong> Eliminar un nodo requiere encontrar su anterior (puede necesitar otro recorrido o referencia extra).</li>
+                         <li><strong>Inserción al Final:</strong> Requiere recorrer toda la lista (O(n)) si no se mantiene una referencia extra a la cola (tail).</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="text-lg mt-6">
+                Son adecuadas cuando las operaciones principales son al inicio de la lista o cuando el recorrido es siempre hacia adelante.
+            </p>
+             <h3 class="text-2xl font-semibold mt-6 mb-3">Ordenamiento (Mención)</h3>
+             <p class="text-lg mb-4">
+                Ordenar listas enlazadas puede ser menos eficiente que ordenar arrays. Se pueden adaptar algoritmos como Insertion Sort, Bubble Sort (modificando enlaces) o usar Merge Sort, que es naturalmente eficiente para listas.
+             </p>
+        </div>
+
+        <div id="slide-11" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-exchange-alt mr-2 text-cyan-600"></i> Listas Lineales Doblemente Enlazadas
+            </h2>
+            <p class="text-lg mb-4">
+                Similares a las listas simples, pero cada nodo tiene <strong>dos referencias</strong>: una al nodo <strong>siguiente</strong> y otra al nodo <strong>anterior</strong>.
+            </p>
+             <h3 class="text-2xl font-semibold mt-6 mb-3">Estructura:</h3>
+            <ul class="list-disc text-lg mb-6 space-y-2">
+                <li><strong>Cabeza (Head):</strong> Referencia al primer nodo. Su campo <code>anterior</code> es <code>null</code>.</li>
+                <li><strong>Cola (Tail):</strong> (Opcional pero muy útil) Referencia al último nodo. Su campo <code>siguiente</code> es <code>null</code>.</li>
+                <li><strong>Nodos:</strong> Contienen dato, referencia <code>siguiente</code> y referencia <code>anterior</code>.</li>
+            </ul>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Definición de un Nodo para Lista Doblemente Enlazada</span>
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">NodoDoble</span> {
+    <span class="code-type">int</span> <span class="code-field">dato</span>;
+    <span class="code-class">NodoDoble</span> <span class="code-field">siguiente</span>;
+    <span class="code-class">NodoDoble</span> <span class="code-field">anterior</span>; <span class="code-comment">// Nueva referencia</span>
+
+    <span class="code-keyword">public</span> <span class="code-method">NodoDoble</span>(<span class="code-type">int</span> <span class="code-parameter">valorDato</span>) {
+        <span class="code-keyword">this</span>.<span class="code-field">dato</span> = valorDato;
+        <span class="code-keyword">this</span>.<span class="code-field">siguiente</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">anterior</span> = <span class="code-literal">null</span>;
+    }
+}</code></pre>
+            </div>
+             <div class="diagram-placeholder">
+                 <i class="fas fa-arrows-alt-h"></i>
+                 <p><strong>Visualización:</strong> head <-> [Ant|Dato|Sig] <-> [Ant|Dato|Sig] <-> ... <-> [Ant|Dato|Sig] <-> tail</p>
+             </div>
+             <p class="text-lg mt-4">
+                Permiten el recorrido en <strong>ambas direcciones</strong> (adelante y atrás).
+            </p>
+        </div>
+
+        <div id="slide-12" class="slide">
+             <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-cyan-600"></i> Listas Dobles: Operaciones Clave
+            </h2>
+             <p class="text-lg mb-4">La manipulación implica actualizar <strong>ambas referencias</strong> (<code>anterior</code> y <code>siguiente</code>) cuidadosamente.</p>
+
+            <h3 class="text-2xl font-semibold mt-2 mb-3">1. Inserción (General)</h3>
+            <p class="text-lg mb-4">Insertar un nuevo nodo `N` entre `A` y `B` (`A <-> B` se convierte en `A <-> N <-> B`):</p>
+            <ol class="list-decimal text-lg mb-4 pl-5 space-y-1">
+                <li><code>N.siguiente = B</code></li>
+                <li><code>N.anterior = A</code></li>
+                <li><code>A.siguiente = N</code> (si A no es null)</li>
+                <li><code>B.anterior = N</code> (si B no es null)</li>
+                <li>Actualizar <code>head</code> o <code>tail</code> si la inserción es al inicio o al final.</li>
+            </ol>
+             <p class="text-lg mb-4">La inserción al final es O(1) si se mantiene una referencia <code>tail</code>.</p>
+
+             <h3 class="text-2xl font-semibold mt-6 mb-3">2. Eliminación (General)</h3>
+            <p class="text-lg mb-4">Eliminar un nodo `N` que está entre `A` y `B` (`A <-> N <-> B` se convierte en `A <-> B`):</p>
+             <ol class="list-decimal text-lg mb-4 pl-5 space-y-1">
+                <li><code>A.siguiente = B</code> (si A no es null, es decir, si N no era el head)</li>
+                <li><code>B.anterior = A</code> (si B no es null, es decir, si N no era el tail)</li>
+                 <li>Actualizar <code>head</code> o <code>tail</code> si se elimina el primer o último nodo.</li>
+                 <li>(Java GC se encarga de liberar la memoria de N eventualmente).</li>
+            </ol>
+            <p class="text-lg mb-4">La eliminación de un nodo específico (si ya tenemos una referencia a él) es más eficiente que en listas simples porque no necesitamos buscar su anterior; el propio nodo ya lo conoce (<code>nodoAEliminar.anterior</code>).</p>
+
+            <h3 class="text-2xl font-semibold mt-6 mb-3">3. Recorrido Bidireccional</h3>
+            <p class="text-lg mb-4">Se puede recorrer fácilmente hacia adelante (usando <code>siguiente</code>) o hacia atrás (usando <code>anterior</code>, empezando desde <code>tail</code> si se tiene).</p>
+        </div>
+
+        <div id="slide-13" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-check-double mr-2 text-cyan-600"></i> Listas Dobles: Ventajas y Desventajas
+            </h2>
+             <div class="grid md:grid-cols-2 gap-6 mt-6">
+                <div class="bg-green-50 p-4 rounded-lg shadow border-l-4 border-green-500">
+                    <h3 class="font-semibold text-green-800 text-xl mb-2"><i class="fas fa-thumbs-up mr-2"></i> Ventajas</h3>
+                    <ul class="list-disc text-green-700 space-y-1 pl-5">
+                        <li><strong>Recorrido Bidireccional:</strong> Se puede ir hacia adelante y atrás.</li>
+                        <li><strong>Eliminación Eficiente:</strong> Eliminar un nodo (dada su referencia) es más rápido (O(1) en cuanto a enlaces, aunque la búsqueda sigue siendo O(n)).</li>
+                        <li><strong>Inserción/Eliminación Flexible:</strong> Más fácil insertar/eliminar antes o después de un nodo conocido.</li>
+                         <li><strong>Inserción/Eliminación al Final Eficiente:</strong> O(1) si se mantiene la referencia <code>tail</code>.</li>
+                    </ul>
+                </div>
+                 <div class="bg-red-50 p-4 rounded-lg shadow border-l-4 border-red-500">
+                    <h3 class="font-semibold text-red-800 text-xl mb-2"><i class="fas fa-thumbs-down mr-2"></i> Desventajas</h3>
+                     <ul class="list-disc text-red-700 space-y-1 pl-5">
+                         <li><strong>Mayor Consumo de Memoria:</strong> Cada nodo necesita espacio para una referencia adicional (<code>anterior</code>).</li>
+                         <li><strong>Manipulación Más Compleja:</strong> Las inserciones y eliminaciones requieren actualizar más referencias, aumentando la posibilidad de errores si se hace manualmente.</li>
+                         <li><strong>Acceso Secuencial:</strong> Sigue siendo O(n) para acceder por posición.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="text-lg mt-6">
+                Son útiles cuando se necesita flexibilidad para moverse en ambas direcciones o cuando las operaciones de eliminación son frecuentes.
+            </p>
+        </div>
+
+        <div id="slide-14" class="slide">
+             <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-laptop-code mr-2 text-cyan-600"></i> Ejemplo: Lista Doblemente Enlazada
+            </h2>
+            <p class="text-lg mb-4">
+                Veamos un ejemplo completo con inserción al final y recorrido en ambas direcciones.
+            </p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Clase NodoDoble (ya definida previamente)</span>
+<span class="code-comment">// public class NodoDoble { int dato; NodoDoble siguiente, anterior; ... }</span>
+
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">ListaDobleEnlazada</span> {
+    <span class="code-class">NodoDoble</span> <span class="code-field">head</span>;
+    <span class="code-class">NodoDoble</span> <span class="code-field">tail</span>; <span class="code-comment">// Referencia al último nodo (muy útil)</span>
+
+    <span class="code-keyword">public</span> <span class="code-method">ListaDobleEnlazada</span>() {
+        <span class="code-keyword">this</span>.<span class="code-field">head</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">tail</span> = <span class="code-literal">null</span>;
+    }
+
+    <span class="code-comment">// Inserta un nodo al final de la lista (O(1) gracias a tail)</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">insertarAlFinal</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-class">NodoDoble</span> <span class="code-field">nuevoNodo</span> = <span class="code-keyword">new</span> <span class="code-class">NodoDoble</span>(dato);
+        <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.<span class="code-field">head</span> == <span class="code-literal">null</span>) { <span class="code-comment">// Lista vacía</span>
+            <span class="code-keyword">this</span>.<span class="code-field">head</span> = nuevoNodo;
+            <span class="code-keyword">this</span>.<span class="code-field">tail</span> = nuevoNodo;
+        } <span class="code-keyword">else</span> { <span class="code-comment">// Lista no vacía</span>
+            nuevoNodo.<span class="code-field">anterior</span> = <span class="code-keyword">this</span>.<span class="code-field">tail</span>; <span class="code-comment">// El anterior del nuevo es la cola actual</span>
+            <span class="code-keyword">this</span>.<span class="code-field">tail</span>.<span class="code-field">siguiente</span> = nuevoNodo; <span class="code-comment">// El siguiente de la cola actual es el nuevo</span>
+            <span class="code-keyword">this</span>.<span class="code-field">tail</span> = nuevoNodo; <span class="code-comment">// La nueva cola es el nuevo nodo</span>
+        }
+    }
+
+    <span class="code-comment">// Imprime la lista desde el inicio (head) hasta el final</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">imprimirAdelante</span>() {
+        <span class="code-class">NodoDoble</span> <span class="code-field">actual</span> = <span class="code-keyword">this</span>.<span class="code-field">head</span>;
+        System.<span class="code-type">out</span>.<span class="code-method">print</span>(<span class="code-string">"Adelante: head -> "</span>);
+        <span class="code-keyword">while</span> (actual != <span class="code-literal">null</span>) {
+            System.<span class="code-type">out</span>.<span class="code-method">print</span>(actual.<span class="code-field">dato</span> + <span class="code-string">" <-> "</span>);
+            actual = actual.<span class="code-field">siguiente</span>;
+        }
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"null (tail)"</span>);
+    }
+
+    <span class="code-comment">// Imprime la lista desde el final (tail) hasta el inicio</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">imprimirAtras</span>() {
+        <span class="code-class">NodoDoble</span> <span class="code-field">actual</span> = <span class="code-keyword">this</span>.<span class="code-field">tail</span>;
+        System.<span class="code-type">out</span>.<span class="code-method">print</span>(<span class="code-string">"Atrás: tail -> "</span>);
+        <span class="code-keyword">while</span> (actual != <span class="code-literal">null</span>) {
+            System.<span class="code-type">out</span>.<span class="code-method">print</span>(actual.<span class="code-field">dato</span> + <span class="code-string">" <-> "</span>);
+            actual = actual.<span class="code-field">anterior</span>;
+        }
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"null (head)"</span>);
+    }
+
+    <span class="code-comment">// --- Ejemplo de Uso ---</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">static</span> <span class="code-keyword">void</span> <span class="code-method">main</span>(<span class="code-type">String</span>[] args) {
+        <span class="code-class">ListaDobleEnlazada</span> <span class="code-field">miLista</span> = <span class="code-keyword">new</span> <span class="code-class">ListaDobleEnlazada</span>();
+        miLista.<span class="code-method">insertarAlFinal</span>(<span class="code-number">10</span>);
+        miLista.<span class="code-method">insertarAlFinal</span>(<span class="code-number">20</span>);
+        miLista.<span class="code-method">insertarAlFinal</span>(<span class="code-number">30</span>);
+
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"--- Lista Doble Enlazada ---"</span>);
+        miLista.<span class="code-method">imprimirAdelante</span>(); <span class="code-comment">// Salida: Adelante: head -> 10 <-> 20 <-> 30 <-> null (tail)</span>
+        miLista.<span class="code-method">imprimirAtras</span>();   <span class="code-comment">// Salida: Atrás: tail -> 30 <-> 20 <-> 10 <-> null (head)</span>
+    }
+}
+                 </code></pre>
+             </div>
+        </div>
+
+         <div id="slide-15" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-graduation-cap mr-2 text-green-500"></i> Conclusiones Clave
+            </h2>
+            <p class="text-lg mb-4">
+                Hemos explorado los fundamentos de las estructuras de datos dinámicas:
+            </p>
+            <ul class="list-disc text-lg mb-6 space-y-2">
+                <li>Las estructuras dinámicas ofrecen <strong>flexibilidad de tamaño</strong> en tiempo de ejecución, a diferencia de los arrays estáticos.</li>
+                <li>Se basan en <strong>nodos</strong> (datos + enlaces) conectados mediante <strong>referencias</strong> (gestionadas automáticamente por el GC en Java).</li>
+                <li>Las <strong>Listas Simplemente Enlazadas</strong> permiten recorrido unidireccional y son eficientes para operaciones al inicio.</li>
+                <li>Las <strong>Listas Doblemente Enlazadas</strong> permiten recorrido bidireccional y facilitan la eliminación, a costa de mayor memoria y complejidad.</li>
+                <li>La elección entre estructuras estáticas y dinámicas, y entre diferentes tipos de listas, depende de los <strong>requisitos específicos</strong> de la aplicación (frecuencia de operaciones, necesidad de acceso, etc.).</li>
+                <li>¡La <strong>visualización</strong> con diagramas es esencial para entender y depurar estas estructuras!</li>
+            </ul>
+            <p class="text-lg mb-4 font-semibold">
+                Próximos pasos:
+            </p>
+             <ul class="list-disc text-lg mb-6 space-y-2">
+                <li>Implementar las operaciones restantes (inserción/eliminación al final/medio, búsqueda) para ambas listas.</li>
+                <li>Explorar otras estructuras dinámicas como Pilas, Colas (que pueden implementarse con listas) y Árboles.</li>
+                <li>Analizar la complejidad temporal (Big O) de cada operación.</li>
+            </ul>
+             <p class="text-xl text-center text-gray-800 font-semibold mt-8">
+                ¡Las estructuras de datos dinámicas son herramientas poderosas en la caja de herramientas de todo ingeniero de software!
+             </p>
+        </div>
+
+
+        <div class="navigation">
+            <button id="prevBtn" class="nav-button" onclick="changeSlide(-1)" disabled>
+                <i class="fas fa-arrow-left mr-2"></i> Anterior
+            </button>
+            <span id="slideCounter" class="slide-counter">1 / 15</span> <button id="nextBtn" class="nav-button" onclick="changeSlide(1)">
+                Siguiente <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+    </div> <script>
+        // --- Lógica JavaScript para la Presentación ---
+        let currentSlide = 1;
+        const totalSlides = 15; // !!! Actualizado al número total de diapositivas !!!
+
+        function showSlide(slideIndex) {
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+                slide.querySelectorAll('.fade-in-down').forEach(el => {
+                    el.style.animation = 'none'; el.offsetHeight; el.style.animation = null;
+                });
+            });
+            const targetSlide = document.getElementById(`slide-${slideIndex}`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                targetSlide.querySelectorAll('.fade-in-down').forEach(el => {
+                     el.style.animation = 'fadeInDown 0.6s ease-out forwards';
+                     if(el.style.animationDelay) { el.style.animationDelay = el.style.animationDelay; }
+                });
+                targetSlide.scrollTop = 0;
+            }
+            document.getElementById('prevBtn').disabled = slideIndex === 1;
+            document.getElementById('nextBtn').disabled = slideIndex === totalSlides;
+            document.getElementById('slideCounter').textContent = `${slideIndex} / ${totalSlides}`;
+        }
+
+        function changeSlide(direction) {
+            const newSlideIndex = currentSlide + direction;
+            if (newSlideIndex >= 1 && newSlideIndex <= totalSlides) {
+                currentSlide = newSlideIndex;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Función para copiar código (solo intento directo)
+        function copyCode(buttonElement) {
+            buttonElement.classList.remove('copied', 'error', 'not-supported'); // Limpiar clases previas
+            const originalText = '<i class="far fa-copy"></i> Copiar';
+
+            // Verificar soporte de la API Clipboard
+            if (!navigator.clipboard) {
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> No Soportado';
+                buttonElement.classList.add('not-supported');
+                console.warn('Clipboard API no disponible en este navegador/contexto.');
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('not-supported'); }, 3000);
+                return;
+            }
+
+            // Encontrar el elemento <code> dentro del <pre> asociado
+            const wrapper = buttonElement.closest('.code-block-wrapper');
+            const codeElement = wrapper ? wrapper.querySelector('pre code') : null;
+
+            if (!codeElement) {
+                console.error('No se encontró el elemento <code> para copiar.');
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> Error Est.';
+                buttonElement.classList.add('error');
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('error'); }, 3000);
+                return;
+            }
+
+            const codeToCopy = codeElement.textContent || "";
+
+            // Intentar escribir al portapapeles
+            navigator.clipboard.writeText(codeToCopy).then(() => {
+                // Éxito
+                buttonElement.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                buttonElement.classList.add('copied');
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('copied'); }, 2000);
+            }).catch(err => {
+                // Error al copiar
+                console.error('Error al copiar directamente al portapapeles:', err);
+                // Mostrar mensaje de error claro
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> Falló Copia (Ver Consola/Permisos)'; // Mensaje más informativo
+                buttonElement.classList.add('error');
+                // Mostrar un tooltip o mensaje adicional podría ser útil aquí, pero es más complejo
+                alert("Error al copiar automáticamente. Asegúrate de estar en un contexto seguro (https o localhost) y que los permisos del navegador estén concedidos. Puedes copiar manualmente el código."); // Usar alert como último recurso
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('error'); }, 4000); // Más tiempo para leer el error
+            });
+        }
+
+
+        // --- Inicialización y Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.presentation-container > .slide');
+            // Asegurarse que los IDs son secuenciales y correctos después de añadir/quitar diapositivas
+            slides.forEach((slide, index) => {
+                slide.id = `slide-${index + 1}`;
+             });
+            showSlide(currentSlide); // Mostrar la primera diapositiva
+             document.querySelectorAll('.copy-button').forEach(button => { button.innerHTML = '<i class="far fa-copy"></i> Copiar'; }); // Resetear botones copia
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' && !document.getElementById('nextBtn').disabled) { changeSlide(1); }
+            else if (event.key === 'ArrowLeft' && !document.getElementById('prevBtn').disabled) { changeSlide(-1); }
+        });
+    </script>
+
+</body>
+</html>

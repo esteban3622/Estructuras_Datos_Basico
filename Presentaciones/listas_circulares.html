@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Más Estructuras de Datos: Listas Circulares, Pilas y Colas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos base y personalizados */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .presentation-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Nuevo Gradiente: Teal/Emerald */
+            background: linear-gradient(135deg, #0d9488 0%, #34d399 100%);
+            padding: 1rem;
+        }
+        .slide {
+            display: none; opacity: 0; transition: opacity 0.5s ease-in-out;
+            min-height: calc(100vh - 100px); border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: white; padding: 2rem 2.5rem; margin-bottom: 1rem;
+            overflow-y: auto; max-height: calc(100vh - 100px);
+        }
+        .slide.active { display: block; opacity: 1; }
+        .navigation {
+            margin-top: auto; padding-top: 1rem; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .nav-button {
+            background-color: rgba(255, 255, 255, 0.85); color: #065f46; /* Verde oscuro para texto */
+            padding: 0.75rem 1.5rem; border-radius: 9999px; border: none; cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: 600; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover { background-color: rgba(255, 255, 255, 1); }
+        .nav-button:active { transform: scale(0.95); }
+        .nav-button:disabled { background-color: rgba(200, 200, 200, 0.6); cursor: not-allowed; opacity: 0.7; }
+        .slide-counter { color: white; font-weight: 500; font-size: 0.9rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .code-block-wrapper { position: relative; margin-top: 1rem; margin-bottom: 1.5rem; }
+        pre {
+            background-color: #1f2937; color: #d1d5db; padding: 1.5rem; padding-top: 3.5rem;
+            border-radius: 0.5rem; overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6;
+            border: 1px solid #374151;
+             user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+        }
+        code { font-family: inherit; }
+        /* Clases para resaltado de sintaxis Java */
+        .code-keyword { color: #60a5fa; font-weight: bold; }
+        .code-type { color: #4ade80; }
+        .code-class { color: #34d399; font-weight: bold;}
+        .code-method { color: #facc15; }
+        .code-parameter { color: #f87171; }
+        .code-comment { color: #9ca3af; font-style: italic; }
+        .code-string { color: #fb923c; }
+        .code-number { color: #a78bfa; }
+        .code-annotation { color: #eab308; }
+        .code-field { color: #c4b5fd; }
+        .code-literal { color: #5eead4; }
+
+        .copy-button {
+            position: absolute; top: 0.75rem; right: 0.75rem; background-color: #4b5563;
+            color: #f3f4f6; border: none; padding: 0.4rem 0.8rem; border-radius: 0.375rem;
+            cursor: pointer; font-size: 0.8rem; font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+            opacity: 0.75; min-width: 100px; text-align: center;
+        }
+        .copy-button:hover { background-color: #6b7280; opacity: 1; }
+        .copy-button i { margin-right: 0.4rem; }
+        .copy-button.copied { background-color: #10b981; color: white; opacity: 1; }
+        .copy-button.error { background-color: #ef4444; color: white; opacity: 1; font-size: 0.75rem; }
+        .copy-button.not-supported { background-color: #f97316; color: white; opacity: 1; }
+        .fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+        h1, h2, h3 { color: #1f2937; }
+        p, li { color: #374151; line-height: 1.6; }
+        strong { color: #059669; /* Verde esmeralda */ }
+        code:not(pre code) { background-color: #d1fae5; color: #047857; padding: 0.2em 0.4em; border-radius: 0.25rem; font-size: 0.85em; }
+        ul { list-style-position: outside; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        .diagram-placeholder {
+            border: 2px dashed #9ca3af; background-color: #f3f4f6; padding: 1.5rem;
+            text-align: center; color: #6b7280; border-radius: 0.5rem; margin-top: 1rem;
+        }
+        .diagram-placeholder i { font-size: 2rem; margin-bottom: 0.5rem; color: #9ca3af; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="presentation-container">
+
+        <div id="slide-1" class="slide active">
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 fade-in-down">
+                    Más Estructuras de Datos
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-8 fade-in-down" style="animation-delay: 0.2s;">
+                    Listas Circulares, Pilas y Colas
+                </p>
+                <i class="fas fa-recycle text-6xl text-emerald-400 fade-in-down" style="animation-delay: 0.4s;"></i>
+                <p class="mt-10 text-gray-500 text-sm">
+                    Estructuras de Datos y Algoritmos
+                </p>
+            </div>
+        </div>
+
+        <div id="slide-2" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-circle-notch mr-2 text-emerald-600"></i> Listas Circulares Simplemente Enlazadas (LCS)
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Definición</h3>
+            <p class="text-lg mb-4">
+                Una <strong>Lista Circular Simplemente Enlazada</strong> es una lista lineal en la que el último nodo apunta de nuevo al primer nodo, formando un círculo. No existe un nodo <code>null</code> que marque el final.
+            </p>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Importancia</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Permiten que cada nodo sea accesible desde cualquier otro nodo, recorriendo la lista.</li>
+                <li>Útiles para modelar procesos cíclicos o recursos compartidos en rotación.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Casos Cotidianos</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><strong>Carrusel de imágenes:</strong> Al llegar a la última imagen, se vuelve a la primera.</li>
+                <li><strong>Turnos en un juego:</strong> Después del último jugador, el turno regresa al primero.</li>
+                <li><strong>Buffers circulares:</strong> Para streaming de datos o gestión de E/S.</li>
+                <li><strong>Listas de reproducción de música:</strong> Opción de repetir la lista completa.</li>
+            </ul>
+        </div>
+
+        <div id="slide-3" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-emerald-600"></i> LCS: Estructura y Operaciones
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Estructura</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Se mantiene una única referencia, usualmente al <strong>último nodo (<code>tail</code>)</strong>. Esto facilita la inserción tanto al inicio (<code>tail.siguiente</code>) como al final.</li>
+                <li>Si la lista tiene un solo nodo, este apunta a sí mismo.</li>
+                <li>Una lista vacía se representa con <code>tail = null</code>.</li>
+                <li>Nodo: Contiene <code>dato</code> y una referencia <code>siguiente</code>.</li>
+            </ul>
+            <div class="diagram-placeholder my-4">
+                 <i class="fas fa-sync-alt"></i>
+                 <p><strong>Visualización:</strong> tail -> [Dato|Sig] -> [Dato|Sig] -> ... -> [Dato|Sig (apunta al primero)]</p>
+            </div>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Operaciones Básicas</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><strong>Crear lista vacía:</strong> <code>tail = null</code>.</li>
+                <li><strong>Insertar:</strong> Al inicio (después de `tail`), al final (actualizando `tail`).</li>
+                <li><strong>Eliminar:</strong> Requiere cuidado para mantener la circularidad.</li>
+                <li><strong>Recorrido:</strong> Se debe tener una condición de parada clara para no entrar en un bucle infinito (ej. volver al nodo de inicio).</li>
+            </ul>
+        </div>
+
+        <div id="slide-4" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fab fa-java mr-2 text-emerald-600"></i> LCS: Ejemplo en Java
+            </h2>
+            <p class="text-lg mb-4">Implementación básica de una Lista Circular Simple con inserción y recorrido.</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Nodo para LCS (similar al Nodo de lista simple)</span>
+<span class="code-keyword">class</span> <span class="code-class">NodoCircularSimple</span> {
+    <span class="code-type">int</span> <span class="code-field">dato</span>;
+    <span class="code-class">NodoCircularSimple</span> <span class="code-field">siguiente</span>;
+
+    <span class="code-keyword">public</span> <span class="code-method">NodoCircularSimple</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-keyword">this</span>.<span class="code-field">dato</span> = dato;
+        <span class="code-keyword">this</span>.<span class="code-field">siguiente</span> = <span class="code-literal">null</span>; <span class="code-comment">// Se ajustará en la lista</span>
+    }
+}
+
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">ListaCircularSimple</span> {
+    <span class="code-class">NodoCircularSimple</span> <span class="code-field">tail</span>; <span class="code-comment">// Referencia al último nodo</span>
+    <span class="code-type">int</span> <span class="code-field">size</span>;
+
+    <span class="code-keyword">public</span> <span class="code-method">ListaCircularSimple</span>() {
+        <span class="code-keyword">this</span>.<span class="code-field">tail</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">size</span> = <span class="code-number">0</span>;
+    }
+
+    <span class="code-comment">// Inserta un nodo al final (y actualiza tail)</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">insertar</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-class">NodoCircularSimple</span> <span class="code-field">nuevoNodo</span> = <span class="code-keyword">new</span> <span class="code-class">NodoCircularSimple</span>(dato);
+        <span class="code-keyword">if</span> (<span class="code-field">tail</span> == <span class="code-literal">null</span>) { <span class="code-comment">// Lista vacía</span>
+            <span class="code-field">tail</span> = nuevoNodo;
+            <span class="code-field">tail</span>.<span class="code-field">siguiente</span> = <span class="code-field">tail</span>; <span class="code-comment">// Apunta a sí mismo</span>
+        } <span class="code-keyword">else</span> {
+            nuevoNodo.<span class="code-field">siguiente</span> = <span class="code-field">tail</span>.<span class="code-field">siguiente</span>; <span class="code-comment">// Nuevo apunta a la cabeza actual</span>
+            <span class="code-field">tail</span>.<span class="code-field">siguiente</span> = nuevoNodo;     <span class="code-comment">// Antigua cola apunta al nuevo</span>
+            <span class="code-field">tail</span> = nuevoNodo;                 <span class="code-comment">// Nuevo es la nueva cola</span>
+        }
+        <span class="code-field">size</span>++;
+    }
+
+    <span class="code-comment">// Imprime la lista circular</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">imprimir</span>() {
+        <span class="code-keyword">if</span> (<span class="code-field">tail</span> == <span class="code-literal">null</span>) {
+            System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Lista vacía."</span>);
+            <span class="code-keyword">return</span>;
+        }
+        <span class="code-class">NodoCircularSimple</span> <span class="code-field">actual</span> = <span class="code-field">tail</span>.<span class="code-field">siguiente</span>; <span class="code-comment">// Empezar por la cabeza</span>
+        System.<span class="code-type">out</span>.<span class="code-method">print</span>(<span class="code-string">"Lista: "</span>);
+        <span class="code-keyword">do</span> {
+            System.<span class="code-type">out</span>.<span class="code-method">print</span>(actual.<span class="code-field">dato</span> + <span class="code-string">" -> "</span>);
+            actual = actual.<span class="code-field">siguiente</span>;
+        } <span class="code-keyword">while</span> (actual != <span class="code-field">tail</span>.<span class="code-field">siguiente</span>); <span class="code-comment">// Detenerse al volver a la cabeza</span>
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"(vuelve a "</span> + <span class="code-field">tail</span>.<span class="code-field">siguiente</span>.<span class="code-field">dato</span> + <span class="code-string">")"</span>);
+    }
+
+    <span class="code-comment">// Ejemplo de uso</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">static</span> <span class="code-keyword">void</span> <span class="code-method">main</span>(<span class="code-type">String</span>[] args) {
+        <span class="code-class">ListaCircularSimple</span> <span class="code-field">lcs</span> = <span class="code-keyword">new</span> <span class="code-class">ListaCircularSimple</span>();
+        lcs.<span class="code-method">insertar</span>(<span class="code-number">10</span>);
+        lcs.<span class="code-method">insertar</span>(<span class="code-number">20</span>);
+        lcs.<span class="code-method">insertar</span>(<span class="code-number">30</span>);
+        lcs.<span class="code-method">imprimir</span>(); <span class="code-comment">// Salida: Lista: 10 -> 20 -> 30 -> (vuelve a 10)</span>
+    }
+}
+                 </code></pre>
+            </div>
+        </div>
+
+        <div id="slide-5" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-sync mr-2 text-emerald-600"></i> Listas Circulares Doblemente Enlazadas (LCD)
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Definición</h3>
+            <p class="text-lg mb-4">
+                Una <strong>Lista Circular Doblemente Enlazada</strong> combina las propiedades de las listas doblemente enlazadas y las listas circulares. Cada nodo tiene referencias al nodo <code>siguiente</code> y al <code>anterior</code>, y la lista forma un ciclo: el <code>siguiente</code> del último nodo apunta al primero, y el <code>anterior</code> del primer nodo apunta al último.
+            </p>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Importancia</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Ofrecen la máxima flexibilidad para recorrer en ambas direcciones y mantener la estructura circular.</li>
+                <li>Las operaciones de inserción y eliminación pueden ser más eficientes en ciertos escenarios que en las LCS, ya que se accede fácilmente a los nodos adyacentes.</li>
+            </ul>
+             <h3 class="text-2xl font-semibold mt-4 mb-2">Casos Cotidianos</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Navegación avanzada en interfaces de usuario (ej. "anterior/siguiente" en un carrusel que es cíclico y permite ir en ambas direcciones).</li>
+                <li>Gestión de buffers o cachés donde se necesita acceso rápido a elementos vecinos en un ciclo.</li>
+            </ul>
+        </div>
+
+        <div id="slide-6" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-emerald-600"></i> LCD: Estructura y Operaciones
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Estructura</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Se mantiene una referencia a la <strong>cabeza (<code>head</code>)</strong>. Opcionalmente, se puede mantener una referencia a la cola (<code>tail</code>) para optimizar algunas operaciones.</li>
+                <li>Si la lista no está vacía: <code>head.anterior</code> apunta al último nodo, y el <code>siguiente</code> del último nodo apunta a <code>head</code>.</li>
+                <li>Nodo: Contiene <code>dato</code>, referencia <code>siguiente</code> y referencia <code>anterior</code>.</li>
+            </ul>
+             <div class="diagram-placeholder my-4">
+                 <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-sync-alt ml-2"></i>
+                 <p><strong>Visualización:</strong> head <-> [Ant|Dato|Sig] <-> ... <-> [Ant (apunta al penúltimo)|Dato|Sig (apunta a head)]</p>
+                 <p>(El 'anterior' de head apunta al último, y el 'siguiente' del último apunta a head)</p>
+            </div>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Operaciones Básicas</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><strong>Crear lista vacía:</strong> <code>head = null</code>.</li>
+                <li><strong>Insertar:</strong> Al inicio, al final, o en una posición específica. Requiere actualizar cuidadosamente 4 referencias.</li>
+                <li><strong>Eliminar:</strong> Más directo que en LCS si se tiene el nodo, ya que se conocen el anterior y el siguiente.</li>
+                <li><strong>Recorrido:</strong> En ambas direcciones, con cuidado de la condición de parada.</li>
+            </ul>
+        </div>
+
+        <div id="slide-7" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fab fa-java mr-2 text-emerald-600"></i> LCD: Ejemplo en Java
+            </h2>
+            <p class="text-lg mb-4">Implementación de Lista Circular Doble con inserción al inicio y recorrido.</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Nodo para LCD (similar al NodoDoble)</span>
+<span class="code-keyword">class</span> <span class="code-class">NodoCircularDoble</span> {
+    <span class="code-type">int</span> <span class="code-field">dato</span>;
+    <span class="code-class">NodoCircularDoble</span> <span class="code-field">siguiente</span>;
+    <span class="code-class">NodoCircularDoble</span> <span class="code-field">anterior</span>;
+
+    <span class="code-keyword">public</span> <span class="code-method">NodoCircularDoble</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-keyword">this</span>.<span class="code-field">dato</span> = dato;
+        <span class="code-keyword">this</span>.<span class="code-field">siguiente</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">anterior</span> = <span class="code-literal">null</span>;
+    }
+}
+
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">ListaCircularDoble</span> {
+    <span class="code-class">NodoCircularDoble</span> <span class="code-field">head</span>; <span class="code-comment">// Solo necesitamos head, tail se deduce</span>
+    <span class="code-type">int</span> <span class="code-field">size</span>;
+
+    <span class="code-keyword">public</span> <span class="code-method">ListaCircularDoble</span>() {
+        <span class="code-keyword">this</span>.<span class="code-field">head</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">size</span> = <span class="code-number">0</span>;
+    }
+
+    <span class="code-comment">// Inserta un nodo al inicio</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">insertarAlInicio</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-class">NodoCircularDoble</span> <span class="code-field">nuevoNodo</span> = <span class="code-keyword">new</span> <span class="code-class">NodoCircularDoble</span>(dato);
+        <span class="code-keyword">if</span> (<span class="code-field">head</span> == <span class="code-literal">null</span>) { <span class="code-comment">// Lista vacía</span>
+            <span class="code-field">head</span> = nuevoNodo;
+            <span class="code-field">head</span>.<span class="code-field">siguiente</span> = <span class="code-field">head</span>;
+            <span class="code-field">head</span>.<span class="code-field">anterior</span> = <span class="code-field">head</span>;
+        } <span class="code-keyword">else</span> {
+            <span class="code-class">NodoCircularDoble</span> <span class="code-field">tail</span> = <span class="code-field">head</span>.<span class="code-field">anterior</span>; <span class="code-comment">// El último nodo actual</span>
+
+            nuevoNodo.<span class="code-field">siguiente</span> = <span class="code-field">head</span>;
+            nuevoNodo.<span class="code-field">anterior</span> = <span class="code-field">tail</span>;
+
+            <span class="code-field">head</span>.<span class="code-field">anterior</span> = nuevoNodo;
+            <span class="code-field">tail</span>.<span class="code-field">siguiente</span> = nuevoNodo;
+            <span class="code-field">head</span> = nuevoNodo; <span class="code-comment">// Nuevo nodo es la nueva cabeza</span>
+        }
+        <span class="code-field">size</span>++;
+    }
+
+    <span class="code-comment">// Imprime la lista hacia adelante</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">imprimirAdelante</span>() {
+        <span class="code-keyword">if</span> (<span class="code-field">head</span> == <span class="code-literal">null</span>) {
+            System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Lista vacía."</span>);
+            <span class="code-keyword">return</span>;
+        }
+        <span class="code-class">NodoCircularDoble</span> <span class="code-field">actual</span> = <span class="code-field">head</span>;
+        System.<span class="code-type">out</span>.<span class="code-method">print</span>(<span class="code-string">"Adelante: "</span>);
+        <span class="code-keyword">do</span> {
+            System.<span class="code-type">out</span>.<span class="code-method">print</span>(actual.<span class="code-field">dato</span> + <span class="code-string">" <-> "</span>);
+            actual = actual.<span class="code-field">siguiente</span>;
+        } <span class="code-keyword">while</span> (actual != <span class="code-field">head</span>);
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"(vuelve a "</span> + <span class="code-field">head</span>.<span class="code-field">dato</span> + <span class="code-string">")"</span>);
+    }
+
+    <span class="code-comment">// Ejemplo de uso</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">static</span> <span class="code-keyword">void</span> <span class="code-method">main</span>(<span class="code-type">String</span>[] args) {
+        <span class="code-class">ListaCircularDoble</span> <span class="code-field">lcd</span> = <span class="code-keyword">new</span> <span class="code-class">ListaCircularDoble</span>();
+        lcd.<span class="code-method">insertarAlInicio</span>(<span class="code-number">100</span>);
+        lcd.<span class="code-method">insertarAlInicio</span>(<span class="code-number">200</span>);
+        lcd.<span class="code-method">insertarAlInicio</span>(<span class="code-number">300</span>);
+        lcd.<span class="code-method">imprimirAdelante</span>(); <span class="code-comment">// Salida: Adelante: 300 <-> 200 <-> 100 <-> (vuelve a 300)</span>
+    }
+}
+                 </code></pre>
+            </div>
+        </div>
+
+        <div id="slide-8" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-layer-group mr-2 text-emerald-600"></i> Pilas (Stacks)
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Definición</h3>
+            <p class="text-lg mb-4">
+                Una <strong>Pila</strong> es una estructura de datos lineal que sigue el principio <strong>LIFO (Last-In, First-Out)</strong>: el último elemento que se añade es el primer elemento que se retira. Las operaciones de inserción y eliminación ocurren en un solo extremo, llamado <strong>tope (top)</strong> de la pila.
+            </p>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Importancia</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Modelan situaciones donde el acceso se restringe al elemento más reciente.</li>
+                <li>Fundamentales en la gestión de llamadas a funciones (call stack del sistema).</li>
+                <li>Utilizadas en algoritmos de retroceso (backtracking), evaluación de expresiones y análisis sintáctico.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Casos Cotidianos</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><strong>Pila de platos:</strong> El último plato colocado es el primero que se toma.</li>
+                <li><strong>Navegador web:</strong> El botón "Atrás" te lleva a la última página visitada (almacenadas en una pila).</li>
+                <li><strong>Función Deshacer (Undo):</strong> Las últimas acciones se guardan en una pila para poder revertirlas.</li>
+            </ul>
+        </div>
+
+        <div id="slide-9" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-emerald-600"></i> Pilas: Estructura y Operaciones
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Estructura</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Pueden implementarse usando <strong>arrays</strong> (con un tamaño fijo o dinámico) o <strong>listas enlazadas</strong> (generalmente simples, operando en la cabeza).</li>
+                <li>Se necesita una referencia o índice para el <strong>tope (top)</strong>.</li>
+            </ul>
+             <div class="diagram-placeholder my-4">
+                 <i class="fas fa-bars"></i>
+                 <p><strong>Visualización:</strong> Un contenedor vertical donde los elementos se apilan y desapilan desde la parte superior.</p>
+            </div>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Operaciones Básicas</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><code>push(elemento)</code>: Añade un elemento al tope de la pila.</li>
+                <li><code>pop()</code>: Elimina y devuelve el elemento del tope. Genera error si la pila está vacía.</li>
+                <li><code>peek()</code> o <code>top()</code>: Devuelve el elemento del tope sin eliminarlo. Genera error si la pila está vacía.</li>
+                <li><code>isEmpty()</code>: Verifica si la pila está vacía.</li>
+                <li><code>size()</code>: Devuelve el número de elementos en la pila.</li>
+            </ul>
+        </div>
+
+        <div id="slide-10" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fab fa-java mr-2 text-emerald-600"></i> Pilas: Ejemplo en Java (con Lista Enlazada)
+            </h2>
+            <p class="text-lg mb-4">Implementación de una Pila usando una lista enlazada simple.</p>
+            <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Se puede reutilizar la clase Nodo (NodoCircularSimple o una nueva NodoPila)</span>
+<span class="code-comment">// class NodoPila { int dato; NodoPila siguiente; ... }</span>
+
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">PilaConLista</span> {
+    <span class="code-keyword">private</span> <span class="code-class">NodoCircularSimple</span> <span class="code-field">top</span>; <span class="code-comment">// El tope de la pila será la cabeza de la lista</span>
+    <span class="code-keyword">private</span> <span class="code-type">int</span> <span class="code-field">size</span>;
+
+    <span class="code-keyword">public</span> <span class="code-method">PilaConLista</span>() {
+        <span class="code-keyword">this</span>.<span class="code-field">top</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">size</span> = <span class="code-number">0</span>;
+    }
+
+    <span class="code-comment">// Apilar un elemento</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">push</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-class">NodoCircularSimple</span> <span class="code-field">nuevoNodo</span> = <span class="code-keyword">new</span> <span class="code-class">NodoCircularSimple</span>(dato);
+        nuevoNodo.<span class="code-field">siguiente</span> = <span class="code-field">top</span>; <span class="code-comment">// El nuevo nodo apunta al antiguo tope</span>
+        <span class="code-field">top</span> = nuevoNodo;         <span class="code-comment">// El nuevo nodo es el nuevo tope</span>
+        <span class="code-field">size</span>++;
+    }
+
+    <span class="code-comment">// Desapilar un elemento</span>
+    <span class="code-keyword">public</span> <span class="code-type">int</span> <span class="code-method">pop</span>() {
+        <span class="code-keyword">if</span> (<span class="code-method">isEmpty</span>()) {
+            <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-class">RuntimeException</span>(<span class="code-string">"La pila está vacía"</span>);
+        }
+        <span class="code-type">int</span> <span class="code-field">dato</span> = <span class="code-field">top</span>.<span class="code-field">dato</span>;
+        <span class="code-field">top</span> = <span class="code-field">top</span>.<span class="code-field">siguiente</span>; <span class="code-comment">// Mover el tope al siguiente nodo</span>
+        <span class="code-field">size</span>--;
+        <span class="code-keyword">return</span> dato;
+    }
+
+    <span class="code-comment">// Ver el elemento del tope</span>
+    <span class="code-keyword">public</span> <span class="code-type">int</span> <span class="code-method">peek</span>() {
+        <span class="code-keyword">if</span> (<span class="code-method">isEmpty</span>()) {
+            <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-class">RuntimeException</span>(<span class="code-string">"La pila está vacía"</span>);
+        }
+        <span class="code-keyword">return</span> <span class="code-field">top</span>.<span class="code-field">dato</span>;
+    }
+
+    <span class="code-keyword">public</span> <span class="code-type">boolean</span> <span class="code-method">isEmpty</span>() {
+        <span class="code-keyword">return</span> <span class="code-field">top</span> == <span class="code-literal">null</span>;
+    }
+
+    <span class="code-keyword">public</span> <span class="code-type">int</span> <span class="code-method">size</span>() {
+        <span class="code-keyword">return</span> <span class="code-field">size</span>;
+    }
+
+    <span class="code-comment">// Ejemplo de uso</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">static</span> <span class="code-keyword">void</span> <span class="code-method">main</span>(<span class="code-type">String</span>[] args) {
+        <span class="code-class">PilaConLista</span> <span class="code-field">miPila</span> = <span class="code-keyword">new</span> <span class="code-class">PilaConLista</span>();
+        miPila.<span class="code-method">push</span>(<span class="code-number">5</span>);
+        miPila.<span class="code-method">push</span>(<span class="code-number">15</span>);
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Tope: "</span> + miPila.<span class="code-method">peek</span>()); <span class="code-comment">// 15</span>
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Pop: "</span> + miPila.<span class="code-method">pop</span>());   <span class="code-comment">// 15</span>
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Tamaño: "</span> + miPila.<span class="code-method">size</span>()); <span class="code-comment">// 1</span>
+    }
+}
+                 </code></pre>
+            </div>
+        </div>
+
+        <div id="slide-11" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-users mr-2 text-emerald-600"></i> Colas (Queues)
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Definición</h3>
+            <p class="text-lg mb-4">
+                Una <strong>Cola</strong> es una estructura de datos lineal que sigue el principio <strong>FIFO (First-In, First-Out)</strong>: el primer elemento que se añade es el primer elemento que se retira. Las inserciones (<code>enqueue</code>) ocurren en un extremo (final o <code>rear</code>) y las eliminaciones (<code>dequeue</code>) en el otro extremo (frente o <code>front</code>).
+            </p>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Importancia</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Modelan situaciones de espera o procesamiento en orden de llegada.</li>
+                <li>Utilizadas en sistemas operativos para la gestión de procesos, colas de impresión, sistemas de mensajería.</li>
+                <li>Fundamentales en algoritmos como la Búsqueda en Anchura (BFS) en grafos.</li>
+            </ul>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Casos Cotidianos</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><strong>Fila en un supermercado o banco:</strong> La primera persona en llegar es la primera en ser atendida.</li>
+                <li><strong>Cola de impresión:</strong> Los documentos se imprimen en el orden en que se enviaron.</li>
+                <li><strong>Atención al cliente por teléfono:</strong> "Su llamada será atendida en el orden en que fue recibida".</li>
+            </ul>
+        </div>
+
+        <div id="slide-12" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-cogs mr-2 text-emerald-600"></i> Colas: Estructura y Operaciones
+            </h2>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Estructura</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li>Pueden implementarse usando <strong>arrays</strong> (a menudo como "arrays circulares" para reutilizar espacio) o <strong>listas enlazadas</strong>.</li>
+                <li>Se necesitan referencias al <strong>frente (<code>front</code>)</strong> para desencolar y al <strong>final (<code>rear</code>)</strong> para encolar.</li>
+            </ul>
+            <div class="diagram-placeholder my-4">
+                 <i class="fas fa-ellipsis-h"></i>
+                 <p><strong>Visualización:</strong> Un contenedor horizontal donde los elementos entran por un extremo (final) y salen por el otro (frente).</p>
+            </div>
+            <h3 class="text-2xl font-semibold mt-4 mb-2">Operaciones Básicas</h3>
+            <ul class="list-disc text-lg mb-4 space-y-2">
+                <li><code>enqueue(elemento)</code>: Añade un elemento al final (<code>rear</code>) de la cola.</li>
+                <li><code>dequeue()</code>: Elimina y devuelve el elemento del frente (<code>front</code>). Genera error si la cola está vacía.</li>
+                <li><code>peek()</code> o <code>front()</code>: Devuelve el elemento del frente sin eliminarlo. Genera error si la cola está vacía.</li>
+                <li><code>isEmpty()</code>: Verifica si la cola está vacía.</li>
+                <li><code>size()</code>: Devuelve el número de elementos en la cola.</li>
+            </ul>
+        </div>
+
+        <div id="slide-13" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fab fa-java mr-2 text-emerald-600"></i> Colas: Ejemplo en Java (con Lista Enlazada)
+            </h2>
+            <p class="text-lg mb-4">Implementación de una Cola usando una lista enlazada simple, manteniendo referencias <code>front</code> y <code>rear</code>.</p>
+             <div class="code-block-wrapper">
+                 <button class="copy-button" onclick="copyCode(this)"><i class="far fa-copy"></i> Copiar</button>
+                 <pre><code class="language-java">
+<span class="code-comment">// Se puede reutilizar la clase Nodo (NodoCircularSimple o una nueva NodoCola)</span>
+<span class="code-comment">// class NodoCola { int dato; NodoCola siguiente; ... }</span>
+
+<span class="code-keyword">public</span> <span class="code-keyword">class</span> <span class="code-class">ColaConLista</span> {
+    <span class="code-keyword">private</span> <span class="code-class">NodoCircularSimple</span> <span class="code-field">front</span>; <span class="code-comment">// Frente de la cola</span>
+    <span class="code-keyword">private</span> <span class="code-class">NodoCircularSimple</span> <span class="code-field">rear</span>;  <span class="code-comment">// Final de la cola</span>
+    <span class="code-keyword">private</span> <span class="code-type">int</span> <span class="code-field">size</span>;
+
+    <span class="code-keyword">public</span> <span class="code-method">ColaConLista</span>() {
+        <span class="code-keyword">this</span>.<span class="code-field">front</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">rear</span> = <span class="code-literal">null</span>;
+        <span class="code-keyword">this</span>.<span class="code-field">size</span> = <span class="code-number">0</span>;
+    }
+
+    <span class="code-comment">// Encolar un elemento</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">void</span> <span class="code-method">enqueue</span>(<span class="code-type">int</span> <span class="code-parameter">dato</span>) {
+        <span class="code-class">NodoCircularSimple</span> <span class="code-field">nuevoNodo</span> = <span class="code-keyword">new</span> <span class="code-class">NodoCircularSimple</span>(dato);
+        <span class="code-keyword">if</span> (<span class="code-method">isEmpty</span>()) {
+            <span class="code-field">front</span> = nuevoNodo;
+            <span class="code-field">rear</span> = nuevoNodo;
+        } <span class="code-keyword">else</span> {
+            <span class="code-field">rear</span>.<span class="code-field">siguiente</span> = nuevoNodo; <span class="code-comment">// El antiguo final apunta al nuevo</span>
+            <span class="code-field">rear</span> = nuevoNodo;          <span class="code-comment">// El nuevo nodo es el nuevo final</span>
+        }
+        <span class="code-field">size</span>++;
+    }
+
+    <span class="code-comment">// Desencolar un elemento</span>
+    <span class="code-keyword">public</span> <span class="code-type">int</span> <span class="code-method">dequeue</span>() {
+        <span class="code-keyword">if</span> (<span class="code-method">isEmpty</span>()) {
+            <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-class">RuntimeException</span>(<span class="code-string">"La cola está vacía"</span>);
+        }
+        <span class="code-type">int</span> <span class="code-field">dato</span> = <span class="code-field">front</span>.<span class="code-field">dato</span>;
+        <span class="code-field">front</span> = <span class="code-field">front</span>.<span class="code-field">siguiente</span>; <span class="code-comment">// Mover el frente al siguiente</span>
+        <span class="code-keyword">if</span> (<span class="code-field">front</span> == <span class="code-literal">null</span>) { <span class="code-comment">// Si la cola queda vacía</span>
+            <span class="code-field">rear</span> = <span class="code-literal">null</span>;
+        }
+        <span class="code-field">size</span>--;
+        <span class="code-keyword">return</span> dato;
+    }
+
+    <span class="code-keyword">public</span> <span class="code-type">int</span> <span class="code-method">peek</span>() {
+        <span class="code-keyword">if</span> (<span class="code-method">isEmpty</span>()) { <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-class">RuntimeException</span>(<span class="code-string">"La cola está vacía"</span>); }
+        <span class="code-keyword">return</span> <span class="code-field">front</span>.<span class="code-field">dato</span>;
+    }
+    <span class="code-keyword">public</span> <span class="code-type">boolean</span> <span class="code-method">isEmpty</span>() { <span class="code-keyword">return</span> <span class="code-field">front</span> == <span class="code-literal">null</span>; }
+    <span class="code-keyword">public</span> <span class="code-type">int</span> <span class="code-method">size</span>() { <span class="code-keyword">return</span> <span class="code-field">size</span>; }
+
+    <span class="code-comment">// Ejemplo de uso</span>
+    <span class="code-keyword">public</span> <span class="code-keyword">static</span> <span class="code-keyword">void</span> <span class="code-method">main</span>(<span class="code-type">String</span>[] args) {
+        <span class="code-class">ColaConLista</span> <span class="code-field">miCola</span> = <span class="code-keyword">new</span> <span class="code-class">ColaConLista</span>();
+        miCola.<span class="code-method">enqueue</span>(<span class="code-number">10</span>);
+        miCola.<span class="code-method">enqueue</span>(<span class="code-number">20</span>);
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Frente: "</span> + miCola.<span class="code-method">peek</span>()); <span class="code-comment">// 10</span>
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Dequeue: "</span> + miCola.<span class="code-method">dequeue</span>()); <span class="code-comment">// 10</span>
+        System.<span class="code-type">out</span>.<span class="code-method">println</span>(<span class="code-string">"Nuevo Frente: "</span> + miCola.<span class="code-method">peek</span>()); <span class="code-comment">// 20</span>
+    }
+}
+                 </code></pre>
+            </div>
+        </div>
+
+        <div id="slide-14" class="slide">
+            <h2 class="text-3xl font-bold mb-6 fade-in-down">
+                <i class="fas fa-check-circle mr-2 text-green-500"></i> Resumen y Próximos Pasos
+            </h2>
+            <p class="text-lg mb-4">
+                Hemos explorado cuatro importantes estructuras de datos:
+            </p>
+            <ul class="list-disc text-lg mb-6 space-y-3">
+                <li><strong>Listas Circulares (Simples y Dobles):</strong> Útiles para modelar ciclos y recorridos continuos, con diferentes flexibilidades de navegación.</li>
+                <li><strong>Pilas (Stacks - LIFO):</strong> Ideales para escenarios de "último en entrar, primero en salir" como el historial de deshacer o llamadas a funciones.</li>
+                <li><strong>Colas (Queues - FIFO):</strong> Perfectas para gestionar elementos en orden de llegada, como colas de tareas o atención al cliente.</li>
+            </ul>
+            <p class="text-lg mb-4">
+                Cada estructura tiene sus <strong>ventajas, desventajas y casos de uso específicos</strong>. La elección correcta depende del problema a resolver, priorizando la eficiencia de las operaciones más frecuentes.
+            </p>
+            <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 mt-6 rounded-md" role="alert">
+                <p class="font-bold"><i class="fas fa-lightbulb mr-2"></i>Recordatorio:</p>
+                <p>Comprender la lógica subyacente (nodos, referencias, LIFO/FIFO) es más importante que memorizar implementaciones exactas. Java ofrece clases predefinidas (<code>LinkedList</code>, <code>Stack</code>, <code>ArrayDeque</code>, <code>PriorityQueue</code>) para muchas de estas estructuras.</p>
+            </div>
+            <p class="text-xl text-center text-gray-800 font-semibold mt-8">
+                ¡Sigue practicando y explorando para dominar estas herramientas fundamentales!
+             </p>
+        </div>
+
+
+        <div class="navigation">
+            <button id="prevBtn" class="nav-button" onclick="changeSlide(-1)" disabled>
+                <i class="fas fa-arrow-left mr-2"></i> Anterior
+            </button>
+            <span id="slideCounter" class="slide-counter">1 / 14</span> <button id="nextBtn" class="nav-button" onclick="changeSlide(1)">
+                Siguiente <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+    </div> <script>
+        // --- Lógica JavaScript para la Presentación ---
+        let currentSlide = 1;
+        const totalSlides = 14; // !!! Actualizado al número total de diapositivas !!!
+
+        function showSlide(slideIndex) {
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+                slide.querySelectorAll('.fade-in-down').forEach(el => {
+                    el.style.animation = 'none'; el.offsetHeight; el.style.animation = null;
+                });
+            });
+            const targetSlide = document.getElementById(`slide-${slideIndex}`);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                targetSlide.querySelectorAll('.fade-in-down').forEach(el => {
+                     el.style.animation = 'fadeInDown 0.6s ease-out forwards';
+                     if(el.style.animationDelay) { el.style.animationDelay = el.style.animationDelay; }
+                });
+                targetSlide.scrollTop = 0;
+            }
+            document.getElementById('prevBtn').disabled = slideIndex === 1;
+            document.getElementById('nextBtn').disabled = slideIndex === totalSlides;
+            document.getElementById('slideCounter').textContent = `${slideIndex} / ${totalSlides}`;
+        }
+
+        function changeSlide(direction) {
+            const newSlideIndex = currentSlide + direction;
+            if (newSlideIndex >= 1 && newSlideIndex <= totalSlides) {
+                currentSlide = newSlideIndex;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Función para copiar código (solo intento directo)
+        function copyCode(buttonElement) {
+            buttonElement.classList.remove('copied', 'error', 'not-supported'); // Limpiar clases previas
+            const originalText = '<i class="far fa-copy"></i> Copiar';
+
+            // Verificar soporte de la API Clipboard
+            if (!navigator.clipboard) {
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> No Soportado';
+                buttonElement.classList.add('not-supported');
+                console.warn('Clipboard API no disponible en este navegador/contexto.');
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('not-supported'); }, 3000);
+                return;
+            }
+
+            // Encontrar el elemento <code> dentro del <pre> asociado
+            const wrapper = buttonElement.closest('.code-block-wrapper');
+            const codeElement = wrapper ? wrapper.querySelector('pre code') : null;
+
+            if (!codeElement) {
+                console.error('No se encontró el elemento <code> para copiar.');
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> Error Est.';
+                buttonElement.classList.add('error');
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('error'); }, 3000);
+                return;
+            }
+
+            const codeToCopy = codeElement.textContent || "";
+
+            // Intentar escribir al portapapeles
+            navigator.clipboard.writeText(codeToCopy).then(() => {
+                // Éxito
+                buttonElement.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                buttonElement.classList.add('copied');
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('copied'); }, 2000);
+            }).catch(err => {
+                // Error al copiar
+                console.error('Error al copiar directamente al portapapeles:', err);
+                // Mostrar mensaje de error claro
+                buttonElement.innerHTML = '<i class="fas fa-times"></i> Falló Copia (Ver Consola/Permisos)'; // Mensaje más informativo
+                buttonElement.classList.add('error');
+                alert("Error al copiar automáticamente. Asegúrate de estar en un contexto seguro (https o localhost) y que los permisos del navegador estén concedidos. Puedes copiar manualmente el código.");
+                setTimeout(() => { buttonElement.innerHTML = originalText; buttonElement.classList.remove('error'); }, 4000);
+            });
+        }
+
+        // --- Inicialización y Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.presentation-container > .slide');
+            slides.forEach((slide, index) => {
+                slide.id = `slide-${index + 1}`;
+             });
+            showSlide(currentSlide);
+             document.querySelectorAll('.copy-button').forEach(button => { button.innerHTML = '<i class="far fa-copy"></i> Copiar'; });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' && !document.getElementById('nextBtn').disabled) { changeSlide(1); }
+            else if (event.key === 'ArrowLeft' && !document.getElementById('prevBtn').disabled) { changeSlide(-1); }
+        });
+    </script>
+
+</body>
+</html>
